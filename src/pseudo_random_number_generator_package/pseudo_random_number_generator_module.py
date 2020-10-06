@@ -50,7 +50,7 @@ class prng_class(object):
         assert isinstance(seed, (int, type(None))), 'Error: The value of the seed is non-integer.'
         assert prng_type in self.prng_object_dict.keys(), 'Error: The string for prng_type is not in the specified list.'
         
-        self.s_array_of_xoshiro256pluspluseed = seed
+        self.seed = seed
         self.prng_type = prng_type
         self.__seed_initialization()
     
@@ -68,10 +68,10 @@ class prng_class(object):
             
             full_zero_bytes_of_digest_size = (0).to_bytes(blake2b_digest_size, byteorder = 'little')
             while True:  #The Xoshiro256PlusPlus algorithm requires that the input seed value is not zero.
-                hash_seed_bytes = blake2b(self.s_array_of_xoshiro256pluspluseed.to_bytes(byte_length_of_seed, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
+                hash_seed_bytes = blake2b(self.seed.to_bytes(byte_length_of_seed, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
                 if hash_seed_bytes == full_zero_bytes_of_digest_size:  #Avoid hash results that are zero.
-                    self.s_array_of_xoshiro256pluspluseed += 1  #Changing the seed value produces a new hash result.
-                    self.s_array_of_xoshiro256pluspluseed = seed_length_mask(self.s_array_of_xoshiro256pluspluseed)
+                    self.seed += 1  #Changing the seed value produces a new hash result.
+                    self.seed = seed_length_mask(self.seed)
                 else:
                     break
             
@@ -79,11 +79,11 @@ class prng_class(object):
         
         seed_initialization_method_dict = {'xoshiro256++': initializes_seed_for_xoshiro256plusplus}
         
-        if self.s_array_of_xoshiro256pluspluseed is None:
+        if self.seed is None:
             from secrets import randbits
-            self.s_array_of_xoshiro256pluspluseed = randbits(self.__class__.seed_length_dict[self.prng_type])  #Read unreproducible seeds provided by the operating system.
+            self.seed = randbits(self.__class__.seed_length_dict[self.prng_type])  #Read unreproducible seeds provided by the operating system.
         else:
-            self.s_array_of_xoshiro256pluspluseed = seed_length_mask(self.s_array_of_xoshiro256pluspluseed)
+            self.seed = seed_length_mask(self.seed)
 
         seed_initialization_method_dict[self.prng_type]()  #The specific initialization seed method is called according to self.prng_type.
         
@@ -148,9 +148,9 @@ class prng_class(object):
         assert isinstance(new_period, int), 'Error: The value of new_period is non-integer.'
         assert new_period <= self.__class__.prng_period_dict[self.prng_type], 'Error: Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.'
         
-        random_number = self.s_array_of_xoshiro256plusplusource_random_number()
+        random_number = self.source_random_number()
         assert isinstance(random_number, int), 'Error: The chosen pseudo-random number generator is non-integer.'
         while True:
             if random_number < new_period:
                 return random_number
-            random_number = self.s_array_of_xoshiro256plusplusource_random_number()
+            random_number = self.source_random_number()
