@@ -12,11 +12,11 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pseudo-random-number-generator)
 ![PyPI - License](https://img.shields.io/pypi/l/pseudo-random-number-generator)
 
-*Generate pseudo-random number package in python.*
+*Generate multi-precision pseudo-random number package in python.*
 
 Xoshiro256++ algorithm has been completed.
 
-There are "methods" that specify the period of a pseudo-random sequence.
+There are "methods" that specify the period of a multi-precision pseudo-random sequence.
 
 ## Installation
 
