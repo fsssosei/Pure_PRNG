@@ -1,5 +1,5 @@
 '''
-pseudo_random_number_generator - This is the package used to generate pseudo-random Numbers.
+pseudo_random_number_generator - This package is used to generate multi-precision pseudo-random Numbers.
 Copyright (C) 2020  sosei
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -20,6 +20,9 @@ __all__ = ['prng_class']
 
 class prng_class(object):
     '''
+        Generate multi-precision pseudo-random Numbers.
+        There are "methods" that specify the period of a pseudo-random sequence.
+        
         prng_class() -> The system random number as the seed of the pseudo-random number generator.
         
         prng_class(seed) -> A pseudo-random number generator that specifies seeds.
@@ -31,7 +34,7 @@ class prng_class(object):
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    version = '0.7.0'
+    version = '0.7.1'
     
     prng_period_dict = {'xoshiro256++': 2 ** 256 - 1}
     seed_length_dict = {'xoshiro256++': 256}
