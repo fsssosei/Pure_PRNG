@@ -13,6 +13,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import gmpy2
 import numpy as np
 
 __all__ = ['prng_class']
@@ -26,9 +27,11 @@ class prng_class(object):
         Note
         ----
         The generated instance is thread-safe.
+        Only the pseudo-random number generation algorithm with period of 2^n or 2^n-1 is adapted.
+        The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    version = '0.6.0'
+    version = '0.7.0'
     
     prng_period_dict = {'xoshiro256++': 2 ** 256 - 1}
     seed_length_dict = {'xoshiro256++': 256}
@@ -48,47 +51,48 @@ class prng_class(object):
         self.prng_object_dict = {'xoshiro256++': self.__xoshiro256plusplus}
         
         assert isinstance(seed, (int, type(None))), 'Error: The value of the seed is non-integer.'
+        if isinstance(seed, int): assert seed >= 0, "Error: seed can't be negative."
         assert prng_type in self.prng_object_dict.keys(), 'Error: The string for prng_type is not in the specified list.'
         
-        self.seed = seed
+        self.seed = self.__seed_initialization(seed, prng_type)
         self.prng_type = prng_type
-        self.__seed_initialization()
     
-    def __seed_initialization(self):  #The original seed is hash obfuscated for pseudo-random generation.
+    def __seed_initialization(self, seed: int, prng_type: str):  #The original seed is hash obfuscated for pseudo-random generation.
         from math import ceil
         from hashlib import blake2b
         
-        def seed_length_mask(seed: int) -> int:
-            seed &= (1 << self.__class__.seed_length_dict[self.prng_type]) - 1
+        def seed_length_mask(seed: int, prng_type: str) -> int:
+            seed &= (1 << self.__class__.seed_length_dict[prng_type]) - 1
             return seed
         
-        def initializes_seed_for_xoshiro256plusplus():  #Generate the initialization seed for Xoshiro256PlusPlus.
-            byte_length_of_seed = ceil(self.__class__.seed_length_dict[self.prng_type] / 8)  #Converts bit length to byte length.
+        def initializes_seed_for_xoshiro256plusplus(seed: int, prng_type: str):  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
+            byte_length_of_seed = ceil(self.__class__.seed_length_dict[prng_type] / 8)  #Converts bit length to byte length.
             blake2b_digest_size = byte_length_of_seed
             
             full_zero_bytes_of_digest_size = (0).to_bytes(blake2b_digest_size, byteorder = 'little')
             while True:  #The Xoshiro256PlusPlus algorithm requires that the input seed value is not zero.
-                hash_seed_bytes = blake2b(self.seed.to_bytes(byte_length_of_seed, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
+                hash_seed_bytes = blake2b(seed.to_bytes(byte_length_of_seed, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
                 if hash_seed_bytes == full_zero_bytes_of_digest_size:  #Avoid hash results that are zero.
-                    self.seed += 1  #Changing the seed value produces a new hash result.
-                    self.seed = seed_length_mask(self.seed)
+                    seed += 1  #Changing the seed value produces a new hash result.
+                    seed = seed_length_mask(seed, prng_type)
                 else:
                     break
             
             self.s_array_of_xoshiro256plusplus = np.array(np.frombuffer(hash_seed_bytes, dtype = np.uint64))  #Xoshiro256PlusPlus to use the 256 bit uint64 seed array.
         
-        seed_initialization_method_dict = {'xoshiro256++': initializes_seed_for_xoshiro256plusplus}
+        each_algorithm_init_dict = {'xoshiro256++': initializes_seed_for_xoshiro256plusplus}
         
-        if self.seed is None:
+        if seed is None:
             from secrets import randbits
-            self.seed = randbits(self.__class__.seed_length_dict[self.prng_type])  #Read unreproducible seeds provided by the operating system.
+            seed = randbits(self.__class__.seed_length_dict[prng_type])  #Read unreproducible seeds provided by the operating system.
         else:
-            self.seed = seed_length_mask(self.seed)
+            seed = seed_length_mask(seed, prng_type)
 
-        seed_initialization_method_dict[self.prng_type]()  #The specific initialization seed method is called according to self.prng_type.
+        each_algorithm_init_dict[prng_type](seed, prng_type)  #The specific initialization seed method is called according to prng_type.
+        return seed
         
     @np.errstate(over = 'ignore')
-    def __xoshiro256plusplus(self) -> int:  #Xoshiro256PlusPlus algorithm implementation.
+    def __xoshiro256plusplus(self) -> int:  #Xoshiro256PlusPlus method realizes full-period length output, [1, 2^ 256-1]
         #The external variable used is "self.s_array_of_xoshiro256plusplus".
         
         def rotl(x: np.uint64, k: np.uint64) -> np.uint64:
@@ -124,6 +128,93 @@ class prng_class(object):
         '''
         return self.prng_object_dict[self.prng_type]()
     
+    def rand_float(self, new_period: int = None) -> gmpy2.mpfr:
+        '''
+            Parameters
+            ----------
+            new_period : integer
+                Set the period of the pseudo-random sequence.
+            
+            Returns a real pseudo-random number of type gmpy2.mpfr of the adaptive period length of a range of [0, 1]. 0 (inclusive) and 1 (exclusive).
+            
+            Examples
+            --------
+            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> prng_instance.rand_float()
+            0.6326937641706669741872583730940429737405414921354622618051716414693676562568173
+            >>> prng_instance.rand_float(115792089237316195423570985008687907853269984665640564039457584007913129639747)
+            0.3513956730047900426657412504296283135563682862601256213620310087617832883445811
+        '''
+        prng_period = self.__class__.prng_period_dict[self.prng_type]
+        bit_num_of_prng_period = prng_period.bit_length() + ((prng_period & 1) - 1)
+        with gmpy2.local_context(gmpy2.context(), precision = bit_num_of_prng_period + 1) as ctx:
+            if new_period is None:
+                return gmpy2.mpfr(self.source_random_number()) / gmpy2.mpfr(prng_period)
+            else:
+                return gmpy2.mpfr(self.random_integer_number_with_definite_period(new_period)) / gmpy2.mpfr(prng_period)
+    
+    def rand_int(self, b: int, a: int = 0, new_period: int = None) -> int:
+        '''
+            Parameters
+            ----------
+            b : integer
+                Upper bound on the range. b is included.
+                
+            a : integer, or 0 (default)
+                Lower bound on the range. a is included.
+            
+            new_period : integer
+                Set the period of the pseudo-random sequence.
+            
+            Returns an integer pseudo-random number in the range [a, b].
+            
+            Examples
+            --------
+            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> prng_instance.rand_int(100, 1)
+            64
+            >>> prng_instance.rand_int(100, 1, 115792089237316195423570985008687907853269984665640564039457584007913129639747)
+            36
+        '''
+        assert isinstance(b, int), 'Error: The value of b is non-integer.'
+        assert isinstance(a, int), 'Error: The value of a is non-integer.'
+        
+        scale = b - a + 1
+        return a + int(scale * self.rand_float(new_period))
+    
+    def generate_set_of_integer_random_numbers(self, b: int, a: int, k: int) -> set:
+        '''
+            Parameters
+            ----------
+            b : integer
+                Upper bound on the range. b is included.
+                
+            a : integer
+                Lower bound on the range. a is included.
+                
+            k : integer
+                The number of set elements generated.
+            
+            Returns a set of pseudo-random Numbers with k elements in the range [a, b].
+            
+            Examples
+            --------
+            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> prng_instance.generate_set_of_integer_random_numbers(100, 1, 6)
+            {64, 39, 9, 41, 23, 92}
+        '''
+        assert isinstance(a, int), 'Error: The value of a is non-integer.'
+        assert isinstance(b, int), 'Error: The value of b is non-integer.'
+        assert isinstance(k, int), 'Error: The value of k is non-integer.'
+        assert a <= b, 'Error: a cannot be greater than b.'
+        assert k >= 0, "Error: k can't be negative."
+        assert k <= (b - a), "Error: k can't be greater than b minus a."
+        
+        set_of_integer_random_numbers = set()
+        while len(set_of_integer_random_numbers) < k:
+            set_of_integer_random_numbers.add(self.rand_int(b, a))
+        return set_of_integer_random_numbers
+    
     def random_integer_number_with_definite_period(self, new_period: int) -> int:
         '''
             Generates an integer pseudo-random number with a specified period.
@@ -137,7 +228,7 @@ class prng_class(object):
             
             Note
             ----
-            The value of (new period/original period) is the conversion efficiency. When the difference between the new period and the original period is large, generating a pseudo-random number can be very slow!
+            The value of (new period / original period) is the conversion efficiency. When the difference between the new period and the original period is large, generating a pseudo-random number can be very slow!
             
             Examples
             --------
@@ -146,11 +237,16 @@ class prng_class(object):
             73260932800743358445652462028207907455677987852735468159219395093090100006110
         '''
         assert isinstance(new_period, int), 'Error: The value of new_period is non-integer.'
-        assert new_period <= self.__class__.prng_period_dict[self.prng_type], 'Error: Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.'
+        prng_period = self.__class__.prng_period_dict[self.prng_type]
+        assert new_period > 0, 'Error: new_period must be greater than zero.'
+        assert new_period <= prng_period, 'Error: Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.'
+        
+        number_to_subtract = prng_period - new_period
+        set_of_numbers_to_exclude = self.generate_set_of_integer_random_numbers(prng_period, prng_period & 1, number_to_subtract)
         
         random_number = self.source_random_number()
         assert isinstance(random_number, int), 'Error: The chosen pseudo-random number generator is non-integer.'
         while True:
-            if random_number < new_period:
+            if random_number not in set_of_numbers_to_exclude:
                 return random_number
             random_number = self.source_random_number()
