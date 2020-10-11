@@ -27,6 +27,8 @@ class prng_class(object):
         
         prng_class(seed) -> A pseudo-random number generator that specifies seeds.
         
+        prng_class(prng_type = 'xoshiro256++') -> Set the pseudo-random number generator algorithm used.
+        
         Note
         ----
         The generated instance is thread-safe.
@@ -34,7 +36,7 @@ class prng_class(object):
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    version = '0.7.1'
+    VERSION = '0.7.2'
     
     prng_period_dict = {'xoshiro256++': 2 ** 256 - 1}
     seed_length_dict = {'xoshiro256++': 256}
