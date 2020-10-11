@@ -1,5 +1,5 @@
 '''
-pseudo_random_number_generator - This is the package used to generate pseudo-random Numbers.
+pseudo_random_number_generator - This package is used to generate multi-precision pseudo-random Numbers.
 Copyright (C) 2020  sosei
 
 This program is free software: you can redistribute it and/or modify
