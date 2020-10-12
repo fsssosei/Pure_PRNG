@@ -23,6 +23,15 @@ There are "methods" that specify the period of a multi-precision pseudo-random s
 Installation can be done through pip. You must have python version >= 3.7
 
 	pip install pseudo-random-number-generator
+	
+On windows, you have to install `gmpy2` manually.
+You can download `gmpy2` bin files from [here][pylib], and use `pip` to install locally.
+
+```shell script
+pip install ./path-to-gmpy2-wheel.whl
+```
+
+[pylib]: https://www.lfd.uci.edu/~gohlke/pythonlibs/?tdsourcetag=s_pcqq_aiomsg
 
 ## Usage
 
