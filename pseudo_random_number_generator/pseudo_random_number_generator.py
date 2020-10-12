@@ -162,12 +162,12 @@ class PseudoRandomNumber(object):
 
             Examples
             --------
-            >>> random = PseudoRandomNumber(170141183460469231731687303715884105727)
-            >>> random.rand_float()
-            0.6326937641706669741872583730940429737405414921354622618051716414693676562568173
-            >>> random.rand_float(115792089237316195423570985008687907853269984665640564039457584007913129639747)
-            0.3513956730047900426657412504296283135563682862601256213620310087617832883445811
-        """
+            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> prng_instance.rand_float()
+            mpfr('0.6326937641706669741872583730940429737405414921354622618051716414693676562568173',257)
+            >>> prng_instance.rand_float(115792089237316195423570985008687907853269984665640564039457584007913129639747)
+            mpfr('0.02795744845257346733436109648463446736744766610965612207643215290679786849301309',257)
+        '''
         prng_period = self.__class__.prng_period_dict[self.prng_type]
         bit_num_of_prng_period = prng_period.bit_length() + ((prng_period & 1) - 1)
         # noinspection PyArgumentList
@@ -196,12 +196,12 @@ class PseudoRandomNumber(object):
 
             Examples
             --------
-            >>> random = PseudoRandomNumber(170141183460469231731687303715884105727)
-            >>> random.rand_int(100, 1)
+            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> prng_instance.rand_int(100, 1)
             64
-            >>> random.rand_int(100, 1, 115792089237316195423570985008687907853269984665640564039457584007913129639747)
-            36
-        """
+            >>> prng_instance.rand_int(100, 1, 115792089237316195423570985008687907853269984665640564039457584007913129639747)
+            3
+        '''
         assert isinstance(b, int), 'Error: The value of b is non-integer.'
         assert isinstance(a, int), 'Error: The value of a is non-integer.'
 
@@ -260,11 +260,10 @@ class PseudoRandomNumber(object):
 
             Examples
             --------
-            >>> random = PseudoRandomNumber(17014118346046923173167303715884105727)
-            >>> period = 115792089237316195423570985008687907853269984665640564039457584007913129639747
-            >>> random.random_integer_number_with_definite_period(period)
-            73260932800743358445652462028207907455677987852735468159219395093090100006110
-        """
+            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> prng_instance.random_integer_number_with_definite_period(115792089237316195423570985008687907853269984665640564039457584007913129639747)
+            40688839126177430252467309162469901643963863918059158449302074429100738061375
+        '''
         assert isinstance(new_period, int), 'Error: The value of new_period is non-integer.'
         prng_period = self.__class__.prng_period_dict[self.prng_type]
         assert new_period > 0, 'Error: new_period must be greater than zero.'
