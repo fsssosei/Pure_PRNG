@@ -162,10 +162,10 @@ class PseudoRandomNumber(object):
 
             Examples
             --------
-            >>> prng_instance = PseudoRandomNumber(170141183460469231731687303715884105727)
-            >>> prng_instance.rand_float()
+            >>> random = PseudoRandomNumber(170141183460469231731687303715884105727)
+            >>> random.rand_float()
             mpfr('0.6326937641706669741872583730940429737405414921354622618051716414693676562568173',257)
-            >>> prng_instance.rand_float(115792089237316195423570985008687907853269984665640564039457584007913129639747)
+            >>> random.rand_float(115792089237316195423570985008687907853269984665640564039457584007913129639747)
             mpfr('0.02795744845257346733436109648463446736744766610965612207643215290679786849301309',257)
         """
         prng_period = self.__class__.prng_period_dict[self.prng_type]
@@ -196,11 +196,11 @@ class PseudoRandomNumber(object):
 
             Examples
             --------
-            >>> prng_instance = PseudoRandomNumber(170141183460469231731687303715884105727)
-            >>> prng_instance.rand_int(100, 1)
+            >>> random = PseudoRandomNumber(170141183460469231731687303715884105727)
+            >>> random.rand_int(100, 1)
             64
             >>> period = 115792089237316195423570985008687907853269984665640564039457584007913129639747
-            >>> prng_instance.rand_int(100, 1, period)
+            >>> random.rand_int(100, 1, period)
             3
         """
         assert isinstance(b, int), 'Error: The value of b is non-integer.'
