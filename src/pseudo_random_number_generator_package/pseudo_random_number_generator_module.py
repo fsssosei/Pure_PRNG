@@ -13,6 +13,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+from typing import Optional, Union
 import gmpy2
 import numpy as np
 
@@ -41,7 +42,7 @@ class prng_class(object):
     prng_period_dict = {'xoshiro256++': 2 ** 256 - 1}
     seed_length_dict = {'xoshiro256++': 256}
     
-    def __init__(self, seed: int = None, prng_type: str = 'xoshiro256++'):
+    def __init__(self, seed: Optional[int] = None, prng_type: str = 'xoshiro256++') -> None:
         '''
             Set up an instance of a pseudorandom number generator.
             
@@ -62,7 +63,7 @@ class prng_class(object):
         self.seed = self.__seed_initialization(seed, prng_type)
         self.prng_type = prng_type
     
-    def __seed_initialization(self, seed: int, prng_type: str):  #The original seed is hash obfuscated for pseudo-random generation.
+    def __seed_initialization(self, seed: int, prng_type: str) -> None:  #The original seed is hash obfuscated for pseudo-random generation.
         from math import ceil
         from hashlib import blake2b
         
@@ -70,7 +71,7 @@ class prng_class(object):
             seed &= (1 << self.__class__.seed_length_dict[prng_type]) - 1
             return seed
         
-        def initializes_seed_for_xoshiro256plusplus(seed: int, prng_type: str):  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
+        def initializes_seed_for_xoshiro256plusplus(seed: int, prng_type: str) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
             byte_length_of_seed = ceil(self.__class__.seed_length_dict[prng_type] / 8)  #Converts bit length to byte length.
             blake2b_digest_size = byte_length_of_seed
             
@@ -115,7 +116,7 @@ class prng_class(object):
             self.s_array_of_xoshiro256plusplus[3] = rotl(self.s_array_of_xoshiro256plusplus[3], np.uint64(45))
         return result
     
-    def source_random_number(self):
+    def source_random_number(self) -> Union[int, float]:
         '''
             Straight out of a pseudorandom number generator original random number.
             
@@ -127,13 +128,14 @@ class prng_class(object):
             
             Examples
             --------
-            >>> prng_instance = prng_class(170141183460469231731687303715884105727)
+            >>> seed = 170141183460469231731687303715884105727
+            >>> prng_instance = prng_class(seed)
             >>> prng_instance.source_random_number()
             73260932800743358445652462028207907455677987852735468159219395093090100006110
         '''
         return self.prng_object_dict[self.prng_type]()
     
-    def rand_float(self, new_period: int = None) -> gmpy2.mpfr:
+    def rand_float(self, new_period: Optional[int] = None) -> gmpy2.mpfr:
         '''
             Parameters
             ----------
@@ -160,7 +162,7 @@ class prng_class(object):
             else:
                 return gmpy2.mpfr(self.random_integer_number_with_definite_period(new_period)) / gmpy2.mpfr(prng_period)
     
-    def rand_int(self, b: int, a: int = 0, new_period: int = None) -> int:
+    def rand_int(self, b: int, a: int = 0, new_period: Optional[int] = None) -> int:
         '''
             Parameters
             ----------
