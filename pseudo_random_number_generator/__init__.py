@@ -1,4 +1,4 @@
-'''
+"""
 pseudo_random_number_generator - This package is used to generate multi-precision pseudo-random Numbers.
 Copyright (C) 2020  sosei
 
@@ -14,6 +14,6 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+"""
 
-from pseudo_random_number_generator_package.pseudo_random_number_generator_module import *
+from .pseudo_random_number_generator import PseudoRandomNumber

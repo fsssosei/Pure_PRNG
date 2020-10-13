@@ -1,4 +1,4 @@
-'''
+"""
 pseudo_random_number_generator - This package is used to generate multi-precision pseudo-random Numbers.
 Copyright (C) 2020  sosei
 
@@ -14,7 +14,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+"""
 
 from setuptools import setup, find_packages
 
@@ -38,8 +38,7 @@ setup(
         'License :: OSI Approved :: GNU Affero General Public License v3',
         'Programming Language :: Python :: 3.7',
     ],
-    package_dir={'': 'src'},
-    packages=find_packages('src'),
+    packages=find_packages(),
     include_package_data=True,
     install_requires=['gmpy2>=2.0.8', 'numpy>=1.18.2']
 )
