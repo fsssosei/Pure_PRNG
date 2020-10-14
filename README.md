@@ -5,7 +5,7 @@
 ![GitHub Release Date](https://img.shields.io/github/release-date/fsssosei/pure_prng)
 [![Build Status](https://scrutinizer-ci.com/g/fsssosei/pure_prng/badges/build.png?b=main)](https://scrutinizer-ci.com/g/fsssosei/pure_prng/build-status/main)
 [![Code Intelligence Status](https://scrutinizer-ci.com/g/fsssosei/pure_prng/badges/code-intelligence.svg?b=main)](https://scrutinizer-ci.com/code-intelligence)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/fsssosei/pure_prng.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fsssosei/pure_prng/context:python)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/fsssosei/Pure_PRNG.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fsssosei/Pure_PRNG/context:python)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/bf34f8d12be84b4492a5a3709df0aae5)](https://www.codacy.com/manual/fsssosei/pure_prng?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=fsssosei/pure_prng&amp;utm_campaign=Badge_Grade)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/fsssosei/pure_prng/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/fsssosei/pure_prng/?branch=main)
 ![PyPI - Downloads](https://img.shields.io/pypi/dw/pure_prng?label=PyPI%20-%20Downloads)
