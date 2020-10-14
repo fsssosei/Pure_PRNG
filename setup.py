@@ -1,5 +1,5 @@
 '''
-pseudo_random_number_generator - This package is used to generate multi-precision pseudo-random Numbers.
+pure_prng - This package is used to generate multi-precision pseudo-random Numbers.
 Copyright (C) 2020  sosei
 
 This program is free software: you can redistribute it and/or modify
@@ -22,16 +22,16 @@ with open("README.md", encoding='utf-8') as fh:
     long_description = fh.read()
 
 setup(
-    name='pseudo_random_number_generator',
-    version='0.7.1',
+    name='pure_prng',
+    version='0.8.0',
     description='Generate multi-precision pseudo-random number package in python.',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/fsssosei/pseudo_random_number_generator',
+    url='https://github.com/fsssosei/Pure_PRNG',
     license='GNU Affero General Public License v3',
     author='sosei',
     author_email='fss.sosei@gmail.com',
-    keywords=['PRN', 'Random', 'Multiple-precision'],
+    keywords=['PRN', 'Random', 'Multiple-precision', 'Variable-period'],
     python_requires='>=3.7',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
