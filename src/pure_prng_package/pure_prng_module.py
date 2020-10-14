@@ -39,7 +39,7 @@ class pure_prng(object):
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    VERSION = '0.8.1'
+    VERSION = '0.8.2'
     
     prng_algorithms_list = ['xoshiro256++']
     
