@@ -17,7 +17,7 @@ There are "methods" that specify the period of a multi-precision pseudo-random s
 
 ## Installation
 
-Installation can be done through pip. You must have python version >= 3.7
+Installation can be done through pip. You must have python version >= 3.8
 
 	pip install pure-prng
 
