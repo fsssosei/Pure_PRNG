@@ -23,7 +23,7 @@ with open("README.md", encoding='utf-8') as fh:
 
 setup(
     name='pure_prng',
-    version='0.8.2',
+    version='0.8.3',
     description='Generate multi-precision pseudo-random number package in python.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -32,7 +32,7 @@ setup(
     author='sosei',
     author_email='fss.sosei@gmail.com',
     keywords=['PRN', 'Random', 'Multiple-precision', 'Variable-period'],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: GNU Affero General Public License v3',
