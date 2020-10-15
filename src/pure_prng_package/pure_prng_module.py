@@ -13,7 +13,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-from typing import Optional, Union, Set
+from typing import Final, Optional, Union, Set
 import gmpy2
 import numpy as np
 
@@ -39,7 +39,7 @@ class pure_prng(object):
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    VERSION = '0.8.2'
+    VERSION: Final = '0.8.3'
     
     prng_algorithms_list = ['xoshiro256++']
     
