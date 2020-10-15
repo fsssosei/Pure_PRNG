@@ -1,4 +1,4 @@
-# pure_prng
+# Pure_PRNG
 
 ![PyPI](https://img.shields.io/pypi/v/pure_prng?color=red)
 ![PyPI - Status](https://img.shields.io/pypi/status/pure_prng)
