@@ -39,7 +39,7 @@ class pure_prng(object):
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    VERSION: Final = '0.8.3'
+    VERSION: Final = '0.8.4'
     
     prng_algorithms_list = ['xoshiro256++']
     
@@ -280,10 +280,10 @@ class pure_prng(object):
             ----
             Set new_period to be no less than 2.
             
-            The return value is in the range [0, new_period).
+            Return value is the range of [0, new_period), with zero included and new_period excluded.
             
             The value of (new period / original period) is the representation of generating efficiency.
-When the difference between the new period and the original period is too large, it may takes a **long** time to generate a pseudo-random number!
+When the difference between the new period and the original period is too large, it may takes a long time to generate a pseudo-random number!
             
             Examples
             --------
