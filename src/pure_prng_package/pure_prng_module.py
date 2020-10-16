@@ -280,6 +280,8 @@ class pure_prng(object):
             ----
             Set new_period to be no less than 2.
             
+            The return value is in the range [0, new_period).
+            
             The value of (new period / original period) is the representation of generating efficiency.
 When the difference between the new period and the original period is too large, it may takes a **long** time to generate a pseudo-random number!
             
