@@ -39,7 +39,7 @@ class pure_prng(object):
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    VERSION: Final = '0.8.4'
+    VERSION: Final = '0.8.5'
     
     prng_algorithms_list = ['xoshiro256++']
     
@@ -58,6 +58,7 @@ class pure_prng(object):
             prng_type: str, or 'xoshiro256++' (default)
                 Set the pseudo-random number algorithm used for the current instance.
         '''
+        self.seed_init_algorithm_dict = {'xoshiro256++': self.__seed_initialize_xoshiro256plusplus}
         self.prng_algorithms_dict = {'xoshiro256++': self.__xoshiro256plusplus}
         
         assert isinstance(seed, (int, type(None))), 'Error: The value of the seed is non-integer.'
@@ -69,39 +70,38 @@ class pure_prng(object):
         self.prev_new_period: Optional[int] = None
     
     def __seed_initialization(self, seed: Union[int, None], prng_type: str) -> int:  #The original seed is hash obfuscated for pseudo-random generation.
-        from math import ceil
-        from hashlib import blake2b
-        
-        def seed_length_mask(seed: int, prng_type: str) -> int:
-            seed &= (1 << self.__class__.seed_length_dict[prng_type]) - 1
+        def seed_length_mask(seed: int, seed_length: int) -> int:
+            seed &= (1 << seed_length) - 1
             return seed
         
-        def seed_initialize_xoshiro256plusplus(seed: int, prng_type: str) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
-            seed_byte_length = ceil(self.__class__.seed_length_dict[prng_type] / 8)  #Converts bit length to byte length.
-            blake2b_digest_size = seed_byte_length
-            
-            full_zero_bytes = (0).to_bytes(blake2b_digest_size, byteorder = 'little')
-            while True:  #The Xoshiro256PlusPlus algorithm requires that the input seed value is not zero.
-                hash_seed_bytes = blake2b(seed.to_bytes(seed_byte_length, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
-                if hash_seed_bytes == full_zero_bytes:  #Avoid hash results that are zero.
-                    seed += 1  #Changing the seed value to produce a new hash result.
-                    seed = seed_length_mask(seed, prng_type)
-                else:
-                    break
-            
-            self.s_array_of_xoshiro256plusplus = np.array(np.frombuffer(hash_seed_bytes, dtype = np.uint64))  #Xoshiro256PlusPlus to use the 256 bit uint64 seed array.
-        
-        seed_init_algorithm_dict = {'xoshiro256++': seed_initialize_xoshiro256plusplus}
+        seed_length = self.__class__.seed_length_dict[prng_type]
         
         if seed is None:
             from secrets import randbits
-            seed = randbits(self.__class__.seed_length_dict[prng_type])  #Read unreproducible seeds provided by the operating system.
+            seed = randbits(seed_length)  #Read unreproducible seeds provided by the operating system.
         else:
-            seed = seed_length_mask(seed, prng_type)
-
-        seed_init_algorithm_dict[prng_type](seed, prng_type)  #The specific initialization seed method is called according to prng_type.
-        return seed
+            seed = seed_length_mask(seed, seed_length)
         
+        self.seed_init_algorithm_dict[prng_type](locals(), seed, seed_length)  #The specific initialization seed method is called according to prng_type.
+        return seed
+    
+    def __seed_initialize_xoshiro256plusplus(self, seed_init_locals: dict, seed: int, seed_length: int) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
+        from math import ceil
+        from hashlib import blake2b
+        
+        seed_byte_length = ceil(seed_length / 8)  #Converts bit length to byte length.
+        blake2b_digest_size = seed_byte_length
+        
+        full_zero_bytes = (0).to_bytes(blake2b_digest_size, byteorder = 'little')
+        while True:  #The Xoshiro256PlusPlus algorithm requires that the input seed value is not zero.
+            hash_seed_bytes = blake2b(seed.to_bytes(seed_byte_length, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
+            if hash_seed_bytes == full_zero_bytes:  #Avoid hash results that are zero.
+                seed += 1  #Changing the seed value to produce a new hash result.
+                seed = seed_init_locals['seed_length_mask'](seed, seed_length)
+            else:
+                break
+        self.s_array_of_xoshiro256plusplus = np.array(np.frombuffer(hash_seed_bytes, dtype = np.uint64))  #Xoshiro256PlusPlus to use the 256 bit uint64 seed array.
+    
     @np.errstate(over = 'ignore')
     def __xoshiro256plusplus(self) -> int:  #Xoshiro256PlusPlus method implements full-period length output, [1, 2^ 256-1]
         #The external variable used is "self.s_array_of_xoshiro256plusplus".
