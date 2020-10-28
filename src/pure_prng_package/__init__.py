@@ -1,5 +1,5 @@
 '''
-pure_prng - This package is used to generate multi-precision pseudo-random Numbers.
+pure_prng - This package is used to generate professional pseudo-random Numbers.
 Copyright (C) 2020  sosei
 
 This program is free software: you can redistribute it and/or modify
