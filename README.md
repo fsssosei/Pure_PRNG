@@ -9,7 +9,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pure_prng)
 ![PyPI - License](https://img.shields.io/pypi/l/pure_prng)
 
-*Generate multi-precision pseudo-random number package in python.*
+*Generate professional pseudo-random number package in python.*
 
 Xoshiro256++ algorithm has been completed.
 
@@ -35,20 +35,20 @@ Example:
 	>>> prng_instance = pure_prng(seed)
 	
 	>>> prng_instance.source_random_number()
-	73260932800743358445652462028207907455677987852735468159219395093090100006110
+	63704397730169193686456860639078459647664747236380824242857347684562650854070
 	
 	>>> prng_instance.rand_float()
-	mpfr('0.6326937641706669741872583730940429737405414921354622618051716414693676562568086',257)
+	mpfr('0.5501619164985171033237722626311247973459654767593884512471329918122925574973017',257)
 	>>> prng_instance.rand_float(period)
-	mpfr('0.02795744845257346733436109648463446736744766610965612207643215290679786849298934',256)
+	mpfr('0.6665079772632617788674079157248027245703466196226109430388828957294865649611888',256)
 	
 	>>> prng_instance.rand_int(100, 1)
-	mpz(94)
+	mpz(54)
 	>>> prng_instance.rand_int(100, 1, period)
-	mpz(38)
+	mpz(61)
 	
 	>>> prng_instance.get_randint_set(100, 1, 6)
-	{mpz(98), mpz(68), mpz(46), mpz(24), mpz(27), mpz(94)}
+	{mpz(5), mpz(9), mpz(18), mpz(54), mpz(57), mpz(93)}
 	
 	>>> prng_instance.rand_with_period(period)
-	40688839126177430252467309162469901643963863918059158449302074429100738061310
+	103085265137502064472166298218885841110988755115459404830932952476483720814169
