@@ -23,7 +23,7 @@ with open("README.md", encoding='utf-8') as fh:
 
 setup(
     name='pure_prng',
-    version='0.9.0',
+    version='0.9.2',
     description='Generate professional pseudo-random number package in python.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -41,5 +41,5 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     include_package_data=True,
-    install_requires=['gmpy2>=2.0.8', 'numpy>=1.18.5', 'pure-nrng>=0.8.0']
+    install_requires=['gmpy2>=2.0.8', 'pure-nrng>=0.8.0']
 )
