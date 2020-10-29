@@ -15,7 +15,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Optional, Union, Set
 import gmpy2
-import numpy as np
 from pure_nrng_package import *
 
 __all__ = ['pure_prng']
@@ -40,7 +39,7 @@ class pure_prng:
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    version = '0.9.0'
+    version = '0.9.2'
     
     prng_algorithms_list = ['xoshiro256++']
     
@@ -86,6 +85,7 @@ class pure_prng:
     def __seed_initialize_xoshiro256plusplus(self, seed_init_locals: dict, seed: int, seed_length: int) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
         from math import ceil
         from hashlib import blake2b
+        from struct import unpack
         
         seed_byte_length = ceil(seed_length / 8)  #Converts bit length to byte length.
         blake2b_digest_size = seed_byte_length
@@ -98,26 +98,26 @@ class pure_prng:
                 seed = rng_util.bit_length_mask(seed, seed_length)
             else:
                 break
-        self.s_array_of_xoshiro256plusplus = np.array(np.frombuffer(hash_seed_bytes, dtype = np.uint64))  #Xoshiro256PlusPlus to use the 256 bit uint64 seed array.
+        self.s_array_of_xoshiro256plusplus = list(unpack('<QQQQ', hash_seed_bytes))  #Xoshiro256PlusPlus to use the 256 bit uint64 seed list.
     
     
-    @np.errstate(over = 'ignore')
     def __xoshiro256plusplus(self) -> int:  #Xoshiro256PlusPlus method implements full-period length output, [1, 2^ 256-1]
         #The external variable used is "self.s_array_of_xoshiro256plusplus".
+        mask64 = 18446744073709551615  #(2 ** 64) - 1
         
-        def rotl(x: np.uint64, k: np.uint64) -> np.uint64:
-            return (x << k) | (x >> np.uint64(64 - k))
+        def rotl(x: int, k: int) -> int:
+            return ((x << k) & mask64) | (x >> (64 - k))
         
         result = 0
         for i in range(4):
-            result |= int(rotl(self.s_array_of_xoshiro256plusplus[0] + self.s_array_of_xoshiro256plusplus[3], np.uint64(23)) + self.s_array_of_xoshiro256plusplus[0]) << (64 * i)
-            t = self.s_array_of_xoshiro256plusplus[1] << np.uint64(17)
+            result |= (rotl(self.s_array_of_xoshiro256plusplus[0] + self.s_array_of_xoshiro256plusplus[3], 23) + self.s_array_of_xoshiro256plusplus[0]) << (64 * i)
+            t = (self.s_array_of_xoshiro256plusplus[1] << 17) & mask64
             self.s_array_of_xoshiro256plusplus[2] ^= self.s_array_of_xoshiro256plusplus[0]
             self.s_array_of_xoshiro256plusplus[3] ^= self.s_array_of_xoshiro256plusplus[1]
             self.s_array_of_xoshiro256plusplus[1] ^= self.s_array_of_xoshiro256plusplus[2]
             self.s_array_of_xoshiro256plusplus[0] ^= self.s_array_of_xoshiro256plusplus[3]
             self.s_array_of_xoshiro256plusplus[2] ^= t
-            self.s_array_of_xoshiro256plusplus[3] = rotl(self.s_array_of_xoshiro256plusplus[3], np.uint64(45))
+            self.s_array_of_xoshiro256plusplus[3] = rotl(self.s_array_of_xoshiro256plusplus[3], 45)
         return result
     
     
