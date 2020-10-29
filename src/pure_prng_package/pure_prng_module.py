@@ -39,7 +39,7 @@ class pure_prng:
         The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    version = '0.9.2'
+    version = '0.9.3'
     
     prng_algorithms_list = ['xoshiro256++']
     
@@ -105,19 +105,19 @@ class pure_prng:
         #The external variable used is "self.s_array_of_xoshiro256plusplus".
         mask64 = 18446744073709551615  #(2 ** 64) - 1
         
-        def rotl(x: int, k: int) -> int:
+        def rotl64(x: int, k: int) -> int:
             return ((x << k) & mask64) | (x >> (64 - k))
         
         result = 0
         for i in range(4):
-            result |= (rotl(self.s_array_of_xoshiro256plusplus[0] + self.s_array_of_xoshiro256plusplus[3], 23) + self.s_array_of_xoshiro256plusplus[0]) << (64 * i)
+            result |= (rotl64(self.s_array_of_xoshiro256plusplus[0] + self.s_array_of_xoshiro256plusplus[3], 23) + self.s_array_of_xoshiro256plusplus[0]) << (64 * i)
             t = (self.s_array_of_xoshiro256plusplus[1] << 17) & mask64
             self.s_array_of_xoshiro256plusplus[2] ^= self.s_array_of_xoshiro256plusplus[0]
             self.s_array_of_xoshiro256plusplus[3] ^= self.s_array_of_xoshiro256plusplus[1]
             self.s_array_of_xoshiro256plusplus[1] ^= self.s_array_of_xoshiro256plusplus[2]
             self.s_array_of_xoshiro256plusplus[0] ^= self.s_array_of_xoshiro256plusplus[3]
             self.s_array_of_xoshiro256plusplus[2] ^= t
-            self.s_array_of_xoshiro256plusplus[3] = rotl(self.s_array_of_xoshiro256plusplus[3], 45)
+            self.s_array_of_xoshiro256plusplus[3] = rotl64(self.s_array_of_xoshiro256plusplus[3], 45)
         return result
     
     
