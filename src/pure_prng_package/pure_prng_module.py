@@ -28,25 +28,26 @@ class pure_prng:
         
         pure_prng(seed) -> A pseudo-random number generator that specifies seeds.
         
-        pure_prng(prng_type = 'xoshiro256++') -> Set the pseudo-random number generator algorithm used.
+        pure_prng(prng_type = {default_prng_type}) -> Set the pseudo-random number generator algorithm used.
         
         Note
         ----
         The generated instance is thread-safe.
         
         Only the pseudo-random number generation algorithm with period of 2^n or 2^n-1 is adapted.
-        
-        The pseudo-random number generation algorithm implemented here must be the full-period length output.
     '''
     
-    version = '0.9.3'
+    version = '0.9.4'
     
     prng_algorithms_list = ['xoshiro256++']
+    default_prng_type = 'xoshiro256++'
+    __doc__ = __doc__.replace('{default_prng_type}', default_prng_type)
     
     prng_period_dict = {'xoshiro256++': 2 ** 256 - 1}
     seed_length_dict = {'xoshiro256++': 256}
+    output_length_dict = {'xoshiro256++': 256}
     
-    def __init__(self, seed: Optional[int] = None, prng_type: str = 'xoshiro256++') -> None:
+    def __init__(self, seed: Optional[int] = None, prng_type: str = default_prng_type) -> None:
         '''
             Create an instance of a pseudo-random number generator.  创建一个伪随机数生成器的实例。
             
@@ -55,8 +56,9 @@ class pure_prng:
             seed: int, default None
                 Sets the seed for the current instance.
             
-            prng_type: str, default 'xoshiro256++'
+            prng_type: str, default {default_prng_type}
                 Set the pseudo-random number algorithm used for the current instance.
+                Available algorithms: {prng_algorithms_list}
         '''
         self.seed_init_algorithm_dict = {'xoshiro256++': self.__seed_initialize_xoshiro256plusplus}
         self.prng_algorithms_dict = {'xoshiro256++': self.__xoshiro256plusplus}
@@ -68,6 +70,8 @@ class pure_prng:
         self.prng_type = prng_type
         self.__seed_initialization(seed, prng_type)
         self.prev_new_period: Optional[int] = None
+    __init__.__doc__ = __init__.__doc__.replace('{default_prng_type}', default_prng_type)
+    __init__.__doc__ = __init__.__doc__.replace('{prng_algorithms_list}', ', '.join([item for item in prng_algorithms_list]))
     
     
     def __seed_initialization(self, seed: Union[int, None], prng_type: str) -> None:  #The original seed is hash obfuscated for pseudo-random generation.
