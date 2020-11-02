@@ -14,6 +14,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 from typing import Optional, Union, Set
+from collections import namedtuple
 import gmpy2
 from pure_nrng_package import *
 
@@ -39,13 +40,12 @@ class pure_prng:
     
     version = '0.9.4'
     
-    prng_algorithms_list = ['xoshiro256++']
+    hash_algorithm_argument = namedtuple('hash_algorithm_argument', ('period', 'seed_size', 'output_size'))
+    hash_algorithms_dict = {'xoshiro256++': hash_algorithm_argument(period = 2 ** 256 - 1, seed_size = 256, output_size = 256)}
+    
+    prng_type_list = list(hash_algorithms_dict.keys())
     default_prng_type = 'xoshiro256++'
     __doc__ = __doc__.replace('{default_prng_type}', default_prng_type)
-    
-    prng_period_dict = {'xoshiro256++': 2 ** 256 - 1}
-    seed_length_dict = {'xoshiro256++': 256}
-    output_length_dict = {'xoshiro256++': 256}
     
     def __init__(self, seed: Optional[int] = None, prng_type: str = default_prng_type) -> None:
         '''
@@ -58,40 +58,40 @@ class pure_prng:
             
             prng_type: str, default {default_prng_type}
                 Set the pseudo-random number algorithm used for the current instance.
-                Available algorithms: {prng_algorithms_list}
+                Available algorithms: {prng_type_list}
         '''
-        self.seed_init_algorithm_dict = {'xoshiro256++': self.__seed_initialize_xoshiro256plusplus}
-        self.prng_algorithms_dict = {'xoshiro256++': self.__xoshiro256plusplus}
+        hash_callable_tuples = namedtuple('hash_callable_tuples', ('seed_init_callable', 'hash_callable'))
+        self.hash_callable_dict = {'xoshiro256++': hash_callable_tuples(seed_init_callable = self.__seed_initialize_xoshiro256plusplus, hash_callable = self.__xoshiro256plusplus)}
         
         assert isinstance(seed, (int, type(None))), f'seed must be an int or None, got type {type(seed).__name__}'
         if isinstance(seed, int) and (seed < 0): raise ValueError('seed must be >= 0')
-        if prng_type not in self.prng_algorithms_dict.keys(): raise ValueError('The string for prng_type is not in the list of implemented algorithms.')
+        if prng_type not in self.hash_callable_dict.keys(): raise ValueError('The string for prng_type is not in the list of implemented algorithms.')
         
         self.prng_type = prng_type
         self.__seed_initialization(seed, prng_type)
         self.prev_new_period: Optional[int] = None
     __init__.__doc__ = __init__.__doc__.replace('{default_prng_type}', default_prng_type)
-    __init__.__doc__ = __init__.__doc__.replace('{prng_algorithms_list}', ', '.join([item for item in prng_algorithms_list]))
+    __init__.__doc__ = __init__.__doc__.replace('{prng_type_list}', ', '.join([item for item in prng_type_list]))
     
     
     def __seed_initialization(self, seed: Union[int, None], prng_type: str) -> None:  #The original seed is hash obfuscated for pseudo-random generation.
-        seed_length = self.__class__.seed_length_dict[prng_type]
+        seed_size = self.__class__.hash_algorithms_dict[prng_type].seed_size
         
         nrng_instance = pure_nrng()
         if seed is None:
-            seed = nrng_instance.true_rand_bits(seed_length)  #Read unreproducible seeds provided by the operating system.
+            seed = nrng_instance.true_rand_bits(seed_size)  #Read unreproducible seeds provided by the operating system.
         else:
-            seed = rng_util.randomness_extractor(seed, seed_length)
+            seed = rng_util.randomness_extractor(seed, seed_size)
         
-        self.seed_init_algorithm_dict[prng_type](locals(), seed, seed_length)  #The specific initialization seed method is called according to prng_type.
+        self.hash_callable_dict[prng_type].seed_init_callable(locals(), seed, seed_size)  #The specific initialization seed method is called according to prng_type.
     
     
-    def __seed_initialize_xoshiro256plusplus(self, seed_init_locals: dict, seed: int, seed_length: int) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
+    def __seed_initialize_xoshiro256plusplus(self, seed_init_locals: dict, seed: int, seed_size: int) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
         from math import ceil
         from hashlib import blake2b
         from struct import unpack
         
-        seed_byte_length = ceil(seed_length / 8)  #Converts bit length to byte length.
+        seed_byte_length = ceil(seed_size / 8)  #Converts bit length to byte length.
         blake2b_digest_size = seed_byte_length
         
         full_zero_bytes = (0).to_bytes(blake2b_digest_size, byteorder = 'little')
@@ -99,7 +99,7 @@ class pure_prng:
             hash_seed_bytes = blake2b(seed.to_bytes(seed_byte_length, byteorder = 'little'), digest_size = blake2b_digest_size).digest()
             if hash_seed_bytes == full_zero_bytes:  #Avoid hash results that are zero.
                 seed += 1  #Changing the seed value to produce a new hash result.
-                seed = rng_util.bit_length_mask(seed, seed_length)
+                seed = rng_util.bit_length_mask(seed, seed_size)
             else:
                 break
         self.s_array_of_xoshiro256plusplus = list(unpack('<QQQQ', hash_seed_bytes))  #Xoshiro256PlusPlus to use the 256 bit uint64 seed list.
@@ -146,7 +146,7 @@ class pure_prng:
             >>> prng_instance.source_random_number()
             63704397730169193686456860639078459647664747236380824242857347684562650854070
         '''
-        return self.prng_algorithms_dict[self.prng_type]()
+        return self.hash_callable_dict[self.prng_type].hash_callable()
     
     
     def rand_float(self, new_period: Optional[int] = None) -> gmpy2.mpfr:
@@ -178,7 +178,7 @@ class pure_prng:
         assert isinstance(new_period, (int, type(None))), f'new_period must be an int or None, got type {type(new_period).__name__}'
         
         if new_period is None:
-            prng_period = self.__class__.prng_period_dict[self.prng_type]
+            prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
             prng_algorithm_lower = prng_period & 1
         else:
             prng_period = new_period
@@ -232,7 +232,7 @@ class pure_prng:
         
         difference_value = b - a
         if new_period is None:
-            prng_period = self.__class__.prng_period_dict[self.prng_type]
+            prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
             prng_algorithm_lower = prng_period & 1
         else:
             prng_period = new_period
@@ -324,7 +324,7 @@ class pure_prng:
             103085265137502064472166298218885841110988755115459404830932952476483720814169
         '''
         assert isinstance(new_period, int), f'new_period must be an int, got type {type(new_period).__name__}'
-        prng_period = self.__class__.prng_period_dict[self.prng_type]
+        prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
         if new_period < 2: raise ValueError('new_period must be >= 2')
         if new_period > prng_period: raise ValueError('Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.')
         
