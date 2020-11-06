@@ -38,7 +38,7 @@ class pure_prng:
         Only the pseudo-random number generation algorithm with period of 2^n or 2^n-1 is adapted.
     '''
     
-    version = '0.9.4'
+    version = '0.9.5'
     
     hash_algorithm_argument = namedtuple('hash_algorithm_argument', ('period', 'seed_size', 'output_size'))
     hash_algorithms_dict = {'xoshiro256++': hash_algorithm_argument(period = 2 ** 256 - 1, seed_size = 256, output_size = 256)}
@@ -176,11 +176,13 @@ class pure_prng:
             mpfr('0.6665079772632617788674079157248027245703466196226109430388828957294865649611888',256)
         '''
         assert isinstance(new_period, (int, type(None))), f'new_period must be an int or None, got type {type(new_period).__name__}'
+        prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
         
         if new_period is None:
-            prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
             prng_algorithm_lower = prng_period & 1
         else:
+            if new_period < 2: raise ValueError('new_period must be >= 2')
+            if new_period > prng_period: raise ValueError('Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.')
             prng_period = new_period
             prng_algorithm_lower = 0
         prng_period_bit_size = prng_period.bit_length() - 1 + prng_algorithm_lower
@@ -229,12 +231,17 @@ class pure_prng:
         assert isinstance(b, int), f'b must be an int, got type {type(b).__name__}'
         assert isinstance(a, int), f'a must be an int, got type {type(a).__name__}'
         assert isinstance(new_period, (int, type(None))), f'new_period must be an int or None, got type {type(new_period).__name__}'
+        if a > b: raise ValueError('a must be <= b')
+        prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
         
         difference_value = b - a
+        if difference_value == 0:
+            return a
         if new_period is None:
-            prng_period = self.__class__.hash_algorithms_dict[self.prng_type].period
             prng_algorithm_lower = prng_period & 1
         else:
+            if new_period < 2: raise ValueError('new_period must be >= 2')
+            if new_period > prng_period: raise ValueError('Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.')
             prng_period = new_period
             prng_algorithm_lower = 0
         if difference_value >= prng_period: raise ValueError('The a to b scale extends beyond the period of the pseudo-random number generator.')
