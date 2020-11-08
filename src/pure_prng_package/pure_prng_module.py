@@ -15,7 +15,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Optional, Union, Set
 from collections import namedtuple
-import gmpy2
+from math import ceil
+from hashlib import blake2b
+from struct import unpack
+from bisect import bisect_left
+from gmpy2 import mpfr, mpz, local_context as gmpy2_local_context, context as gmpy2_context, bit_mask as gmpy2_bit_mask
 from pure_nrng_package import *
 
 __all__ = ['pure_prng']
@@ -38,7 +42,7 @@ class pure_prng:
         Only the pseudo-random number generation algorithm with period of 2^n or 2^n-1 is adapted.
     '''
     
-    version = '0.9.5'
+    version = '0.9.6'
     
     hash_algorithm_argument = namedtuple('hash_algorithm_argument', ('period', 'seed_size', 'output_size'))
     hash_algorithms_dict = {'xoshiro256++': hash_algorithm_argument(period = 2 ** 256 - 1, seed_size = 256, output_size = 256)}
@@ -87,10 +91,6 @@ class pure_prng:
     
     
     def __seed_initialize_xoshiro256plusplus(self, seed_init_locals: dict, seed: int, seed_size: int) -> None:  #Generate the self variable used by the Xoshiro256PlusPlus algorithm.
-        from math import ceil
-        from hashlib import blake2b
-        from struct import unpack
-        
         seed_byte_length = ceil(seed_size / 8)  #Converts bit length to byte length.
         blake2b_digest_size = seed_byte_length
         
@@ -107,21 +107,23 @@ class pure_prng:
     
     def __xoshiro256plusplus(self) -> int:  #Xoshiro256PlusPlus method implements full-period length output, [1, 2^ 256-1]
         #The external variable used is "self.s_array_of_xoshiro256plusplus".
-        mask64 = 18446744073709551615  #(2 ** 64) - 1
+        s_array_of_xoshiro256plusplus = self.s_array_of_xoshiro256plusplus
+        
+        mask64 = 2 ** 64 - 1
         
         def rotl64(x: int, k: int) -> int:
             return ((x << k) & mask64) | (x >> (64 - k))
         
         result = 0
         for i in range(4):
-            result |= (rotl64(self.s_array_of_xoshiro256plusplus[0] + self.s_array_of_xoshiro256plusplus[3], 23) + self.s_array_of_xoshiro256plusplus[0]) << (64 * i)
-            t = (self.s_array_of_xoshiro256plusplus[1] << 17) & mask64
-            self.s_array_of_xoshiro256plusplus[2] ^= self.s_array_of_xoshiro256plusplus[0]
-            self.s_array_of_xoshiro256plusplus[3] ^= self.s_array_of_xoshiro256plusplus[1]
-            self.s_array_of_xoshiro256plusplus[1] ^= self.s_array_of_xoshiro256plusplus[2]
-            self.s_array_of_xoshiro256plusplus[0] ^= self.s_array_of_xoshiro256plusplus[3]
-            self.s_array_of_xoshiro256plusplus[2] ^= t
-            self.s_array_of_xoshiro256plusplus[3] = rotl64(self.s_array_of_xoshiro256plusplus[3], 45)
+            result |= ((rotl64(s_array_of_xoshiro256plusplus[0] + s_array_of_xoshiro256plusplus[3], 23) + s_array_of_xoshiro256plusplus[0]) & mask64) << (64 * i)
+            t = (s_array_of_xoshiro256plusplus[1] << 17) & mask64
+            s_array_of_xoshiro256plusplus[2] ^= s_array_of_xoshiro256plusplus[0]
+            s_array_of_xoshiro256plusplus[3] ^= s_array_of_xoshiro256plusplus[1]
+            s_array_of_xoshiro256plusplus[1] ^= s_array_of_xoshiro256plusplus[2]
+            s_array_of_xoshiro256plusplus[0] ^= s_array_of_xoshiro256plusplus[3]
+            s_array_of_xoshiro256plusplus[2] ^= t
+            s_array_of_xoshiro256plusplus[3] = rotl64(s_array_of_xoshiro256plusplus[3], 45)
         return result
     
     
@@ -149,7 +151,7 @@ class pure_prng:
         return self.hash_callable_dict[self.prng_type].hash_callable()
     
     
-    def rand_float(self, new_period: Optional[int] = None) -> gmpy2.mpfr:
+    def rand_float(self, new_period: Optional[int] = None) -> mpfr:
         '''
             Generate a pseudo-random real number (you can set the pseudo-random number generator algorithm period).  生成一个伪随机实数（可设定伪随机数生成器算法周期）。
             
@@ -161,7 +163,7 @@ class pure_prng:
             
             Returns
             -------
-            rand_float: gmpy2.mpfr
+            rand_float: mpfr
                 Returns a pseudo-random real number in [0, 1), with 0 included and 1 excluded.
                 The floating-point length is the output length of the specified algorithm plus one.
             
@@ -186,15 +188,15 @@ class pure_prng:
             prng_period = new_period
             prng_algorithm_lower = 0
         prng_period_bit_size = prng_period.bit_length() - 1 + prng_algorithm_lower
-        with gmpy2.local_context(gmpy2.context(), precision = prng_period_bit_size + 1):
+        with gmpy2_local_context(gmpy2_context(), precision = prng_period_bit_size + 1):
             if new_period is None:
-                random_number = gmpy2.mpfr(self.source_random_number() - prng_algorithm_lower)
+                random_number = mpfr(self.source_random_number() - prng_algorithm_lower)
             else:
-                random_number = gmpy2.mpfr(self.rand_with_period(prng_period))
-            return random_number / gmpy2.mpfr(prng_period)
+                random_number = mpfr(self.rand_with_period(prng_period))
+            return random_number / mpfr(prng_period)
     
     
-    def rand_int(self, b: int, a: int = 0, new_period: Optional[int] = None) -> gmpy2.mpz:
+    def rand_int(self, b: int, a: int = 0, new_period: Optional[int] = None) -> mpz:
         '''
             Generates a pseudo-random integer within a specified interval (can set the pseudo-random number generator algorithm period).  生成一个指定区间内的伪随机整数（可设定伪随机数生成器算法周期）。
             
@@ -211,7 +213,7 @@ class pure_prng:
             
             Returns
             -------
-            rand_int: gmpy2.mpz
+            rand_int: mpz
                 Returns an integer pseudo-random number in the range [a, b].
             
             Note
@@ -247,19 +249,21 @@ class pure_prng:
         if difference_value >= prng_period: raise ValueError('The a to b scale extends beyond the period of the pseudo-random number generator.')
         
         scale = difference_value + prng_algorithm_lower
-        bit_mask = gmpy2.bit_mask(scale.bit_length())
+        bit_mask = gmpy2_bit_mask(scale.bit_length())
         if new_period is None:
-            random_number_masked = self.source_random_number() & bit_mask
+            source_random_number = self.source_random_number
+            random_number_masked = source_random_number() & bit_mask
             while not (prng_algorithm_lower <= random_number_masked <= scale):
-                random_number_masked = self.source_random_number() & bit_mask
+                random_number_masked = source_random_number() & bit_mask
         else:
-            random_number_masked = self.rand_with_period(prng_period) & bit_mask
+            rand_with_period = self.rand_with_period
+            random_number_masked = rand_with_period(prng_period) & bit_mask
             while not (random_number_masked <= scale):
-                random_number_masked = self.rand_with_period(prng_period) & bit_mask
+                random_number_masked = rand_with_period(prng_period) & bit_mask
         return a + (random_number_masked - prng_algorithm_lower)
     
     
-    def get_randint_set(self, b: int, a: int, k: int) -> Set[gmpy2.mpz]:
+    def get_randint_set(self, b: int, a: int, k: int) -> Set[mpz]:
         '''
             Generates a set of pseudo-random integers in a specified interval. 生成一个指定区间内的伪随机整数的集合。
             
@@ -276,7 +280,7 @@ class pure_prng:
             
             Returns
             -------
-            get_randint_set: Set[gmpy2.mpz]
+            get_randint_set: Set[mpz]
                 Returns a set of pseudo-random Numbers with k elements in the range [a, b].
             
             Examples
@@ -293,9 +297,10 @@ class pure_prng:
         if k < 0: raise ValueError('k must be >= 0')
         if k > (b - a): raise ValueError("k can't be greater than b minus a")
         
-        randint_set: Set[gmpy2.mpz] = set()
+        randint_set: Set[mpz] = set()
+        rand_int = self.rand_int
         while len(randint_set) < k:
-            randint_set.add(self.rand_int(b, a))
+            randint_set.add(rand_int(b, a))
         return randint_set
     
     
@@ -335,22 +340,22 @@ class pure_prng:
         if new_period < 2: raise ValueError('new_period must be >= 2')
         if new_period > prng_period: raise ValueError('Suppose the new period number cannot be greater than the original period number of the pseudorandom number generator.')
         
-        from bisect import bisect_left
-        
         prng_algorithm_lower = prng_period & 1
         number_to_subtract = prng_period - new_period
         
-        if new_period != self.prev_new_period:
-            self.set_of_numbers_to_exclude = self.get_randint_set(prng_period, prng_algorithm_lower, number_to_subtract)
-            self.ordered_list_of_excluded_numbers = sorted(self.set_of_numbers_to_exclude)
+        if new_period != self.prev_new_period:  #Determines that the cache is not updated when the cycle is still called before.
+            set_of_numbers_to_exclude = self.get_randint_set(prng_period, prng_algorithm_lower, number_to_subtract)
+            self.set_of_numbers_to_exclude = set_of_numbers_to_exclude
+            self.ordered_list_of_excluded_numbers = sorted(set_of_numbers_to_exclude)
             self.prev_new_period = new_period
         
-        random_number = self.source_random_number()
+        source_random_number = self.source_random_number
+        random_number = source_random_number()
         assert isinstance(random_number, int), 'The chosen pseudo-random number algorithm is non-integer.'
         while True:
             if random_number not in self.set_of_numbers_to_exclude:
                 break
-            random_number = self.source_random_number()
+            random_number = source_random_number()
         
         random_number -= bisect_left(self.ordered_list_of_excluded_numbers, random_number)
         return random_number - prng_algorithm_lower
