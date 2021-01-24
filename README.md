@@ -76,13 +76,23 @@ Example:
 ##Future work
 
 The following algorithm is intended to be implemented:
-    MIXMAX
-    XSM
-    GPU Philox
-    Inversive congruential generator
-    Blum-Micali generator
-    Kaliski generators
-    Naor–Reingold
-    NLFSR
-    ISAAC+
-    Salmon
+
+MIXMAX
+
+XSM
+
+GPU Philox
+
+Inversive congruential generator
+
+Blum-Micali generator
+
+Kaliski generators
+
+Naor–Reingold
+
+NLFSR
+
+ISAAC+
+
+Salmon
