@@ -15,6 +15,28 @@ Only the pseudo-random number algorithm with good statistical properties is impl
 
 There are "methods" that specify the period of a multi-precision pseudo-random sequence.
 
+## Realized pseudo-random number generation algorithm
+
+Quadratic Congruential Generator
+
+Cubic Congruential Generator
+
+PCG64_XSL_RR; PCG64_DXSM
+
+LCG128Mix_XSL_RR; LCG128Mix_DXSM; LCG128Mix_MURMUR3
+
+EFIIX64
+
+PhiloxCounter
+
+ThreeFryCounter
+
+AESCounter
+
+ChaChaCounter
+
+SPECKCounter
+
 ## Installation
 
 Installation can be done through pip. You must have python version >= 3.8
