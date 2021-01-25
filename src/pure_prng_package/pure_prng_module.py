@@ -13,7 +13,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-from typing import TypeVar, Optional, Union, Callable, Set, Dict, Iterator
+from typing import TypeVar, Optional, Union, Callable, Set, Iterator
 from hashlib import shake_256
 from bisect import bisect_left
 from gmpy2 import mpfr, mpz, local_context as gmpy2_local_context, context as gmpy2_get_context, bit_mask as gmpy2_bit_mask, c_div as gmpy2_c_div, t_div as gmpy2_t_div, t_divmod as gmpy2_t_divmod
@@ -210,7 +210,7 @@ class pure_prng:
         x = self.state_of_qcg
         
         m = algorithm_characteristics_parameter['hash_size']
-        for _ in range(algorithm_characteristics_parameter['hash_period']):
+        for _ in range(algorithm_characteristics_parameter['hash_period']):  #lgtm [py/redundant-else]
             x = (((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
         else:
@@ -226,7 +226,7 @@ class pure_prng:
         x = self.state_of_ccg
         
         m = algorithm_characteristics_parameter['hash_size']
-        for _ in range(algorithm_characteristics_parameter['hash_period']):
+        for _ in range(algorithm_characteristics_parameter['hash_period']):  #lgtm [py/redundant-else]
             x = (((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
         else:
