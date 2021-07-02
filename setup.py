@@ -41,5 +41,5 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     include_package_data=True,
-    install_requires=['gmpy2>=2.0.8', 'randomgen>=1.19.3', 'pure-nrng>=1.0.0']
+    install_requires=['gmpy2>=2.0.8', 'randomgen>=1.19.3', 'pure-nrng>=1.1.0']
 )
