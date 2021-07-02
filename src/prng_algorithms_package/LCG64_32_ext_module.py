@@ -25,7 +25,7 @@ __all__ = ['LCG64_32_ext']
 
 class LCG64_32_ext:
     '''
-        The period of this random generator is 2^(32*(2^n+2)).
+        This is an extended linear congruence generator algorithm.
         
         References
         ----------
@@ -33,9 +33,21 @@ class LCG64_32_ext:
         https://baobaobear.github.io/post/20200104-xoshiro/
     '''
     
-    version = '1.0.0'
+    version = '1.1.0'
     
     def __init__(self, seed: int, n: int = 1):
+        '''
+            Create an instance of a pseudo-random number generator.  创建一个伪随机数生成器的实例。
+            
+            Parameters
+            ----------
+            seed: Integer, default None
+                Sets the seed for the current instance.
+            
+            n: int, default integer 1
+                Set the parameters for the period.
+                The period of this random generator is 2^(32*(2^n+2))
+        '''
         self.n = n
         self.ext_size = 1 << n
         
@@ -43,7 +55,7 @@ class LCG64_32_ext:
         ext_seed_multiplier = c_uint64(6364136223846793005).value
         ext_seed_addend = c_uint64(1).value
         
-        init_num_of_iter = 256 * 256
+        init_num_of_iter = 2 ** 16
         
         seed = c_uint64(seed).value
         ext_seed = c_uint64(seed * ext_seed_multiplier + ext_seed_addend).value
@@ -60,6 +72,7 @@ class LCG64_32_ext:
         
         for i in range(init_num_of_iter):
             self.random_raw()
+    
     
     def random_raw(self):
         a_array_multiplier = c_uint32(2891336453).value
