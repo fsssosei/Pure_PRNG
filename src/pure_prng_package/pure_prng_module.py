@@ -1,6 +1,6 @@
 '''
 pure_prng - This package is used to generate professional pseudo-random Numbers.
-Copyright (C) 2020  sosei
+Copyright (C) 2020-2021  sosei
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
 by the Free Software Foundation, either version 3 of the License, or
@@ -18,6 +18,7 @@ from hashlib import shake_256
 from bisect import bisect_left
 from gmpy2 import mpfr, mpz, local_context as gmpy2_local_context, context as gmpy2_get_context, bit_mask as gmpy2_bit_mask, c_div as gmpy2_c_div, t_div as gmpy2_t_div, t_divmod as gmpy2_t_divmod
 from randomgen import PCG64, LCG128Mix, EFIIX64, Philox as PhiloxCounter, ThreeFry as ThreeFryCounter, AESCounter, ChaCha as ChaChaCounter, SPECK128 as SPECKCounter
+from prng_algorithms_package import LCG64_32_ext
 from pure_nrng_package import *
 
 __all__ = ['pure_prng']
@@ -40,21 +41,22 @@ class pure_prng:
         It must be a pseudo-random number generation algorithm with hash block values in [0, 2^n-1], and k-dimensional uniform distribution.  必须是hash块值域在[0, 2^n]，和k维均匀分布的伪随机数生成算法。
     '''
     
-    version = '1.0.0'
+    version = '2.0.0'
     
-    prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'modify_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
-                            'CCG': {'hash_period': 1 << 256, 'modify_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
-                            'PCG64_XSL_RR': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'PCG64_DXSM': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'LCG128Mix_XSL_RR': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'LCG128Mix_DXSM': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'LCG128Mix_MURMUR3': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'EFIIX64': {'hash_period': 1 << 64, 'modify_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
-                            'PhiloxCounter': {'hash_period': 1 << 256, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'ThreeFryCounter': {'hash_period': 1 << 256, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'AESCounter': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'ChaChaCounter': {'hash_period': 1 << 128, 'modify_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 64},
-                            'SPECKCounter': {'hash_period': 1 << 129, 'modify_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 64}}
+    prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
+                            'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
+                            'PCG64_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'PCG64_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'LCG64_32_ext': {'hash_period': 1 << 128, 'variable_period': True, 'additional_hash': False, 'seed_size': 64, 'hash_size': 32},
+                            'LCG128Mix_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'LCG128Mix_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'LCG128Mix_MURMUR3': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
+                            'PhiloxCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'AESCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'ChaChaCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 64},
+                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 64}}
     
     for _, algorithm_characteristics_parameter in prng_algorithms_dict.items():
         hash_period = algorithm_characteristics_parameter['hash_period']
@@ -63,7 +65,7 @@ class pure_prng:
             algorithm_characteristics_parameter['output_width'] = 1
             algorithm_characteristics_parameter['output_size'] = hash_size
         else:
-            period_bit_length = (hash_period - 1).bit_length()
+            period_bit_length = hash_period.bit_length() - 1
             hash_size = algorithm_characteristics_parameter['hash_size']
             output_width = gmpy2_c_div(period_bit_length, hash_size)
             algorithm_characteristics_parameter['prng_period'] = gmpy2_t_div(hash_period, output_width)
@@ -74,7 +76,7 @@ class pure_prng:
     default_prng_type = 'QCG'
     #__doc__ = __doc__.replace('', '')
     
-    def __init__(self, seed: Optional[Integer] = None, prng_type: str = default_prng_type, new_hash_size: Optional[Integer] = None, additional_hash: Union[bool, Callable[[int, int], int], None] = None) -> None:
+    def __init__(self, seed: Optional[Integer] = None, prng_type: str = default_prng_type, new_prng_period: Optional[Integer] = None, additional_hash: Union[bool, Callable[[int, int], int], None] = None) -> None:
         '''
             Create an instance of a pseudo-random number generator.  创建一个伪随机数生成器的实例。
             
@@ -88,8 +90,9 @@ class pure_prng:
                 Set the pseudo-random number algorithm used for the current instance.
                 Available algorithms: {prng_type_list}
             
-            new_hash_size: Integer, default None
-                Set the size of the pseudo-random hash block.('modify_period' is true pseudo-random number generator algorithm)
+            new_prng_period: Integer, default None
+                Set the period for a variable period hash. ('variable_period' is true pseudo-random number generator algorithm)
+                The period that is actually set will be >= the input new_prng_period.
             
             additional_hash: bool, or Callable[[int, int], int]], default None
                 The default is to be confused by the built-in Settings of each algorithm.  缺省是按每种算法内置设定决定混淆与否。
@@ -98,14 +101,15 @@ class pure_prng:
         '''
         assert isinstance(seed, (int, type(mpz(0)), type(None))), f'seed must be an Integer or None, got type {type(seed).__name__}'
         assert isinstance(prng_type, str), f'prng_type must be an str, got type {type(prng_type).__name__}'
-        assert isinstance(new_hash_size, (int, type(mpz(0)), type(None))), f'new_period must be an Integer or None, got type {type(new_hash_size).__name__}'
+        assert isinstance(new_prng_period, (int, type(mpz(0)), type(None))), f'new_prng_period must be an Integer or None, got type {type(new_prng_period).__name__}'
         assert isinstance(additional_hash, (bool, Callable, type(None))), f'additional_hash must be an bool or Callable or None, got type {type(additional_hash).__name__}'
         
-        all_hash_callable_dict = {'internal_generator': {'seed_init_callable': self.__seed_initialize_internal_generator, 'hash_callable': self.__internal_generator},
-                                  'QCG': {'seed_init_callable': self.__seed_initialize_quadratic_congruential_generator, 'hash_callable': self.__quadratic_congruential_generator},
-                                  'CCG': {'seed_init_callable': self.__seed_initialize_cubic_congruential_generator, 'hash_callable': self.__cubic_congruential_generator},
+        all_hash_callable_dict = {'internal_generator': {'seed_init_callable': self.__seed_initialize_internal_generator, 'set_hash_period_callable': self.__set_hash_period_of_general, 'hash_callable': self.__internal_generator},
+                                  'QCG': {'seed_init_callable': self.__seed_initialize_quadratic_congruential_generator, 'set_hash_period_callable': self.__set_hash_period_of_general, 'hash_callable': self.__quadratic_congruential_generator},
+                                  'CCG': {'seed_init_callable': self.__seed_initialize_cubic_congruential_generator, 'set_hash_period_callable': self.__set_hash_period_of_general, 'hash_callable': self.__cubic_congruential_generator},
                                   'PCG64_XSL_RR': {'seed_init_callable': self.__seed_initialize_pcg64_xsl_rr, 'hash_callable': self.__pcg64_xsl_rr},
                                   'PCG64_DXSM': {'seed_init_callable': self.__seed_initialize_pcg64_dxsm, 'hash_callable': self.__pcg64_dxsm},
+                                  'LCG64_32_ext': {'seed_init_callable': self.__seed_initialize_lcg64_32_ext, 'set_hash_period_callable': self.__set_hash_period_of_lcg64_32_ext, 'hash_callable': self.__lcg64_32_ext},
                                   'LCG128Mix_XSL_RR': {'seed_init_callable': self.__seed_initialize_lcg128mix_xsl_rr, 'hash_callable': self.__lcg128mix_xsl_rr},
                                   'LCG128Mix_DXSM': {'seed_init_callable': self.__seed_initialize_lcg128mix_dxsm, 'hash_callable': self.__lcg128mix_dxsm},
                                   'LCG128Mix_MURMUR3': {'seed_init_callable': self.__seed_initialize_lcg128mix_murmur3, 'hash_callable': self.__lcg128mix_murmur3},
@@ -121,23 +125,19 @@ class pure_prng:
         if prng_type not in prng_algorithms_dict.keys(): raise ValueError('The string for prng_type is not in the list of implemented algorithms.')
         
         algorithm_characteristics_parameter = prng_algorithms_dict[prng_type]
-        if algorithm_characteristics_parameter['modify_period']:
-            if new_hash_size is not None:
-                if new_hash_size < 1: raise ValueError('new_hash_size must be >= 1')
-                algorithm_characteristics_parameter['hash_period'] = 1 << new_hash_size
-                algorithm_characteristics_parameter['seed_size'] = new_hash_size
-                algorithm_characteristics_parameter['hash_size'] = new_hash_size
-                algorithm_characteristics_parameter['prng_period'] = algorithm_characteristics_parameter['hash_period']
-                algorithm_characteristics_parameter['output_width'] = 1
-                algorithm_characteristics_parameter['output_size'] = new_hash_size
+        if algorithm_characteristics_parameter['variable_period']:
+            if new_prng_period is not None:
+                if new_prng_period < 1: raise ValueError('new_prng_period must be >= 1')
+                if new_prng_period & gmpy2_bit_mask(new_prng_period.bit_length() - 1) != 0: raise ValueError('new_prng_period must be a power of 2')
+                self.__set_hash_period(algorithm_characteristics_parameter, new_prng_period, all_hash_callable_dict[prng_type]['set_hash_period_callable'])
         else:
-            if new_hash_size is not None: raise TypeError(f'The {prng_type} algorithm cannot modify the period.')
+            if new_prng_period is not None: raise TypeError(f'The {prng_type} algorithm cannot modify the period.')
         
         if algorithm_characteristics_parameter['hash_period'] != float('+inf'):
             internal_algorithm_characteristics_parameter = dict()
             internal_output_size = algorithm_characteristics_parameter['output_size']
             internal_algorithm_characteristics_parameter['hash_period'] = 1 << internal_output_size
-            internal_algorithm_characteristics_parameter['modify_period'] = True
+            internal_algorithm_characteristics_parameter['variable_period'] = True
             internal_algorithm_characteristics_parameter['additional_hash'] = False
             internal_algorithm_characteristics_parameter['seed_size'] = internal_output_size
             internal_algorithm_characteristics_parameter['hash_size'] = internal_output_size
@@ -160,13 +160,13 @@ class pure_prng:
             all_hash_callable_dict[prng_type]['additional_hash_callable'] = additional_hash
         
         hash_callable_dict = all_hash_callable_dict[prng_type]
-        self.__seed_initialization(seed, algorithm_characteristics_parameter, hash_callable_dict)
-        hash_callable_dict['hash_callable'] = hash_callable_dict['hash_callable'](algorithm_characteristics_parameter)
+        self.__seed_initialization(seed, algorithm_characteristics_parameter, hash_callable_dict['seed_init_callable'])
+        hash_callable_dict['hash_callable'] = hash_callable_dict['hash_callable'](algorithm_characteristics_parameter)  #Changed the all_hash_callable_dict
         
         all_hash_callable_dict['internal_generator']['additional_hash_callable'] = None
         hash_callable_dict = all_hash_callable_dict['internal_generator']
-        self.__seed_initialization(seed, internal_algorithm_characteristics_parameter, hash_callable_dict)
-        hash_callable_dict['hash_callable'] = hash_callable_dict['hash_callable'](internal_algorithm_characteristics_parameter)
+        self.__seed_initialization(seed, internal_algorithm_characteristics_parameter, hash_callable_dict['seed_init_callable'])
+        hash_callable_dict['hash_callable'] = hash_callable_dict['hash_callable'](internal_algorithm_characteristics_parameter)  #Changed the all_hash_callable_dict
         
         self.prng_type = prng_type
         self.all_hash_callable_dict = all_hash_callable_dict
@@ -174,7 +174,43 @@ class pure_prng:
     __init__.__doc__ = __init__.__doc__.replace('{prng_type_list}', ', '.join([item for item in prng_type_list]))
     
     
-    def __seed_initialization(self, seed: Union[Integer, None], algorithm_characteristics_parameter: dict, hash_callable_dict: dict) -> None:  #The original seed is hash obfuscated for pseudo-random generation.
+    def __set_hash_period(self, algorithm_characteristics_parameter: dict, new_prng_period: Integer, set_hash_period_callable: Callable[[dict, Integer], None]) -> None:
+        set_hash_period_callable(algorithm_characteristics_parameter, new_prng_period)
+    
+    
+    def __set_hash_period_of_general(self, algorithm_characteristics_parameter: dict, new_prng_period: Integer) -> None:
+        new_prng_period_bit_length = new_prng_period.bit_length()
+        new_prng_period_bit_length -= 1 if (new_prng_period & gmpy2_bit_mask(new_prng_period_bit_length - 1)) == 0  else 0
+        algorithm_characteristics_parameter['hash_period'] = new_prng_period
+        algorithm_characteristics_parameter['seed_size'] = new_prng_period_bit_length
+        algorithm_characteristics_parameter['hash_size'] = new_prng_period_bit_length
+        algorithm_characteristics_parameter['prng_period'] = new_prng_period
+        algorithm_characteristics_parameter['output_width'] = 1
+        algorithm_characteristics_parameter['output_size'] = new_prng_period_bit_length
+    
+    
+    def __set_hash_period_of_lcg64_32_ext(self, algorithm_characteristics_parameter: dict, new_prng_period: Integer) -> None:
+        new_prng_period_bit_length = new_prng_period.bit_length()
+        new_prng_period_bit_length -= 1 if (new_prng_period & gmpy2_bit_mask(new_prng_period_bit_length - 1)) == 0 else 0
+        
+        q, r = divmod(new_prng_period_bit_length, 32)
+        output_width = q + (1 if r != 0 else 0)
+        new_hash_period_bit_length =  new_prng_period_bit_length * output_width
+        
+        q, r = divmod(new_hash_period_bit_length, 32)
+        n = (q - 2).bit_length() - (1 if r == 0 else 0)
+        set_hash_period_bit_length = 32 * (2 ** n + 2)
+        
+        hash_period = 2 ** set_hash_period_bit_length
+        hash_size = algorithm_characteristics_parameter['hash_size']
+        
+        algorithm_characteristics_parameter['hash_period'] = hash_period
+        algorithm_characteristics_parameter['prng_period'] = gmpy2_t_div(hash_period, output_width)
+        algorithm_characteristics_parameter['output_width'] = output_width
+        algorithm_characteristics_parameter['output_size'] = hash_size * output_width
+    
+    
+    def __seed_initialization(self, seed: Union[Integer, None], algorithm_characteristics_parameter: dict, hash_callable: Callable[[dict, Integer, dict], None]) -> None:  #The original seed is hash obfuscated for pseudo-random generation.
         seed_size = algorithm_characteristics_parameter['seed_size']
         
         if seed is None:
@@ -184,7 +220,7 @@ class pure_prng:
         else:
             seed = seed & gmpy2_bit_mask(seed_size)
         seed = int(seed)
-        hash_callable_dict['seed_init_callable'](locals(), seed, algorithm_characteristics_parameter)  #The specific initialization seed method is called according to prng_type.
+        hash_callable(locals(), seed, algorithm_characteristics_parameter)  #The specific initialization seed method is called according to prng_type.
     
     
     def __seed_initialize_internal_generator(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #Generate the state variables used by the internal algorithm.
@@ -210,7 +246,7 @@ class pure_prng:
         x = self.state_of_qcg
         
         m = algorithm_characteristics_parameter['hash_size']
-        for _ in range(algorithm_characteristics_parameter['hash_period']):  #lgtm [py/redundant-else]
+        for _ in range(algorithm_characteristics_parameter['hash_period']):
             x = (((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
         else:
@@ -226,7 +262,7 @@ class pure_prng:
         x = self.state_of_ccg
         
         m = algorithm_characteristics_parameter['hash_size']
-        for _ in range(algorithm_characteristics_parameter['hash_period']):  #lgtm [py/redundant-else]
+        for _ in range(algorithm_characteristics_parameter['hash_period']):
             x = (((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
         else:
@@ -251,6 +287,19 @@ class pure_prng:
         #The external variable used is "self.pcg64_dxsm_instance".
         while True:
             yield self.pcg64_dxsm_instance.random_raw()
+    
+    
+    def __seed_initialize_lcg64_32_ext(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The LCG64_32_ext method is initialized with seeds.
+        period_bit_length = algorithm_characteristics_parameter['hash_period'].bit_length() - 1
+        q = period_bit_length // 32
+        n = (q - 2).bit_length() - 1
+        self.lcg64_32_ext_instance = LCG64_32_ext(seed, n)
+    
+    
+    def __lcg64_32_ext(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.lcg64_32_ext_instance".
+        while True:
+            yield self.lcg64_32_ext_instance.random_raw()
     
     
     def __seed_initialize_lcg128mix_xsl_rr(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The LCG128Mix_XSL_RR method is initialized with seeds.
@@ -364,7 +413,7 @@ class pure_prng:
             >>> next(source_random_number)
             65852230656997158461166665751696465914198450243194923777324019418213544382100
             
-            >>> prng_instance = pure_prng(seed, new_hash_size = 512)
+            >>> prng_instance = pure_prng(seed, new_prng_period = 2 ** 512)
             >>> source_random_number = prng_instance.source_random_number()
             >>> next(source_random_number)
             8375486648769878807557228126183349922765245383564825377649864304632902242469125910865615742661048315918259479944116325466004411700005484642554244082978452
