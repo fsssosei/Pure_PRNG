@@ -26,6 +26,11 @@ __all__ = ['LCG64_32_ext']
 class LCG64_32_ext:
     '''
         The period of this random generator is 2^(32*(2^n+2)).
+        
+        References
+        ----------
+        "伪随机数生成算法"
+        https://baobaobear.github.io/post/20200104-xoshiro/
     '''
     
     version = '1.0.0'
