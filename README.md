@@ -23,6 +23,8 @@ Cubic Congruential Generator
 
 PCG64_XSL_RR; PCG64_DXSM
 
+LCG64_32_ext
+
 LCG128Mix_XSL_RR; LCG128Mix_DXSM; LCG128Mix_MURMUR3
 
 EFIIX64
@@ -59,7 +61,7 @@ Example:
 	>>> next(source_random_number)
 	65852230656997158461166665751696465914198450243194923777324019418213544382100
 	
-	>>> prng_instance = pure_prng(seed, new_hash_size = 512)
+	>>> prng_instance = pure_prng(seed, new_prng_period = 2 ** 512)
 	>>> source_random_number = prng_instance.source_random_number()
 	>>> next(source_random_number)
 	8375486648769878807557228126183349922765245383564825377649864304632902242469125910865615742661048315918259479944116325466004411700005484642554244082978452
