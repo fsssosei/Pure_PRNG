@@ -1,6 +1,6 @@
 '''
 pure_prng - This package is used to generate professional pseudo-random Numbers.
-Copyright (C) 2020  sosei
+Copyright (C) 2020-2021  sosei
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
