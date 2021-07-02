@@ -1,5 +1,5 @@
 '''
-LCG64_32_ext - This package is the LCG64_32_EXT pseudo-random generator.
+LCG64_32_ext - This package is the LCG64_32_ext pseudo-random generator.
 Copyright (C) 2021  sosei
 
 This program is free software: you can redistribute it and/or modify
