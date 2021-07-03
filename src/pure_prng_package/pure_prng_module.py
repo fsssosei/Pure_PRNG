@@ -249,8 +249,7 @@ class pure_prng:
         for _ in range(algorithm_characteristics_parameter['hash_period']):
             x = (((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
-        else:
-            raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
+        raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
     
     
     def __seed_initialize_cubic_congruential_generator(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #Generate the state variables used by the CCG algorithm.
@@ -265,8 +264,7 @@ class pure_prng:
         for _ in range(algorithm_characteristics_parameter['hash_period']):
             x = (((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
-        else:
-            raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
+        raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
     
     
     def __seed_initialize_pcg64_xsl_rr(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The PCG64_XSL_RR method is initialized with seeds.
