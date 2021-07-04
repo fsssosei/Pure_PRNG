@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import TypeVar
 from ctypes import c_uint64
-from gmpy2 import bit_mask as gmpy2_bit_mask
+from gmpy2 import mpz, bit_mask as gmpy2_bit_mask
 from rng_util_package import rotl
 
 __all__ = ['XSM64']
