@@ -73,7 +73,7 @@ class XSM:
         
         self.__step_forwards()
         
-        tmp = tmp ^ rotl((tmp + self.lcg_high) & self.mask64, 64, 32)
+        tmp ^= rotl((tmp + self.lcg_high) & self.mask64, 64, 32)
         tmp = (tmp * K) & self.mask64
         tmp ^= tmp >> 32
         
