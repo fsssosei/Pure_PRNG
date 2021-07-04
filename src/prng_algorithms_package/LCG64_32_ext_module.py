@@ -16,12 +16,15 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+from typing import TypeVar
 from ctypes import c_uint32, c_uint64
 from array import array
 from gmpy2 import bit_mask as gmpy2_bit_mask
 from rng_util_package import rotl, rotr
 
 __all__ = ['LCG64_32_ext']
+
+Integer = TypeVar('Integer', int, mpz)
 
 class LCG64_32_ext:
     '''
@@ -74,7 +77,7 @@ class LCG64_32_ext:
             self.random_raw()
     
     
-    def random_raw(self):
+    def random_raw(self) -> Integer:
         a_array_multiplier = c_uint32(2891336453).value
         a_array_addend = c_uint32(887987685).value
         s_multiplier = c_uint64(3935559000370003845).value
