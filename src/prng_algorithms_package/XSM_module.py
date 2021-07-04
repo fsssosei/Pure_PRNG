@@ -76,4 +76,5 @@ class XSM:
         tmp = tmp ^ rotl((tmp + self.lcg_high) & self.mask64, 64, 32)
         tmp = (tmp * K) & self.mask64
         tmp ^= tmp >> 32
+        
         return tmp
