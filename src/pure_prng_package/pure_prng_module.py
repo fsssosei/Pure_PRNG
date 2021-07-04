@@ -18,7 +18,7 @@ from hashlib import shake_256
 from bisect import bisect_left
 from gmpy2 import mpfr, mpz, local_context as gmpy2_local_context, context as gmpy2_get_context, bit_mask as gmpy2_bit_mask, c_div as gmpy2_c_div, t_div as gmpy2_t_div, t_divmod as gmpy2_t_divmod
 from randomgen import PCG64, LCG128Mix, EFIIX64, Philox as PhiloxCounter, ThreeFry as ThreeFryCounter, AESCounter, ChaCha as ChaChaCounter, SPECK128 as SPECKCounter
-from prng_algorithms_package import LCG64_32_ext
+from prng_algorithms_package import *
 from pure_nrng_package import *
 
 __all__ = ['pure_prng']
