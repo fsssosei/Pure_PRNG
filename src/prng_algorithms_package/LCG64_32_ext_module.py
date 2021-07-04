@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import TypeVar
 from ctypes import c_uint32, c_uint64
 from array import array
-from gmpy2 import bit_mask as gmpy2_bit_mask
+from gmpy2 import mpz, bit_mask as gmpy2_bit_mask
 from rng_util_package import rotl, rotr
 
 __all__ = ['LCG64_32_ext']
