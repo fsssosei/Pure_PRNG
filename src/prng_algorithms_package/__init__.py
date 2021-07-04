@@ -17,4 +17,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 from prng_algorithms_package.LCG64_32_ext_module import *
-from prng_algorithms_package.ISAAC_Plus_module import *
+from prng_algorithms_package.XSM_module import *
