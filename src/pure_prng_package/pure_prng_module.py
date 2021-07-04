@@ -41,7 +41,7 @@ class pure_prng:
         It must be a pseudo-random number generation algorithm with hash block values in [0, 2^n-1], and k-dimensional uniform distribution.  必须是hash块值域在[0, 2^n]，和k维均匀分布的伪随机数生成算法。
     '''
     
-    version = '2.0.0'
+    version = '2.1.0'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
@@ -51,6 +51,7 @@ class pure_prng:
                             'LCG128Mix_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'LCG128Mix_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'LCG128Mix_MURMUR3': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
+                            'XSM64': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
                             'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
                             'PhiloxCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
@@ -113,6 +114,7 @@ class pure_prng:
                                   'LCG128Mix_XSL_RR': {'seed_init_callable': self.__seed_initialize_lcg128mix_xsl_rr, 'hash_callable': self.__lcg128mix_xsl_rr},
                                   'LCG128Mix_DXSM': {'seed_init_callable': self.__seed_initialize_lcg128mix_dxsm, 'hash_callable': self.__lcg128mix_dxsm},
                                   'LCG128Mix_MURMUR3': {'seed_init_callable': self.__seed_initialize_lcg128mix_murmur3, 'hash_callable': self.__lcg128mix_murmur3},
+                                  'XSM64': {'seed_init_callable': self.__seed_initialize_xsm64, 'hash_callable': self.__xsm64},
                                   'EFIIX64': {'seed_init_callable': self.__seed_initialize_efiix64, 'hash_callable': self.__efiix64},
                                   'PhiloxCounter': {'seed_init_callable': self.__seed_initialize_philox_counter, 'hash_callable': self.__philox_counter},
                                   'ThreeFryCounter': {'seed_init_callable': self.__seed_initialize_threefry_counter, 'hash_callable': self.__threefry_counter},
@@ -328,6 +330,16 @@ class pure_prng:
         #The external variable used is "self.lcg128mix_murmur3_instance".
         while True:
             yield self.lcg128mix_murmur3_instance.random_raw()
+    
+    
+    def __seed_initialize_xsm64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The XSM64 method is initialized with seeds.
+        self.xsm64_instance = XSM64(seed)
+    
+    
+    def __xsm64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.xsm64_instance".
+        while True:
+            yield self.xsm64_instance.random_raw()
     
     
     def __seed_initialize_efiix64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The EFIIX64 method is initialized with seeds.
