@@ -27,6 +27,8 @@ LCG64_32_ext
 
 LCG128Mix_XSL_RR; LCG128Mix_DXSM; LCG128Mix_MURMUR3
 
+XSM64
+
 EFIIX64
 
 PhiloxCounter
@@ -103,8 +105,6 @@ The following algorithm is intended to be implemented:
 
 MIXMAX
 
-XSM
-
 GPU Philox
 
 Inversive congruential generator
@@ -116,7 +116,5 @@ Kaliski generators
 Naor–Reingold
 
 NLFSR
-
-ISAAC+
 
 Salmon
