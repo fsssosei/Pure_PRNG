@@ -1,5 +1,5 @@
 '''
-LCG64_32_ext - This package is the LCG64_32_ext pseudo-random generator.
+prng_algorithms - This package is a collection of PRNG algorithms.
 Copyright (C) 2021  sosei
 
 This program is free software: you can redistribute it and/or modify
@@ -17,3 +17,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 from prng_algorithms_package.LCG64_32_ext_module import *
+from prng_algorithms_package.ISAAC_Plus_module import *
