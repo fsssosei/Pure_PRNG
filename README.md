@@ -105,16 +105,10 @@ The following algorithm is intended to be implemented:
 
 MIXMAX
 
-GPU Philox
-
 Inversive congruential generator
-
-Blum-Micali generator
-
-Kaliski generators
-
-Naor–Reingold
 
 NLFSR
 
 Salmon
+
+GPU Philox
