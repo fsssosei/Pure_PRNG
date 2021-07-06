@@ -21,6 +21,8 @@ Quadratic Congruential Generator
 
 Cubic Congruential Generator
 
+Inversive Congruential Generator
+
 PCG64_XSL_RR; PCG64_DXSM
 
 LCG64_32_ext
@@ -106,8 +108,6 @@ Example:
 The following algorithm is intended to be implemented:
 
 MIXMAX
-
-Inversive congruential generator
 
 NLFSR
 
