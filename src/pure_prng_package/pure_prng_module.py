@@ -43,10 +43,11 @@ class pure_prng:
         
     '''
     
-    version = '2.2.0'
+    version = '2.3.0'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
+                            'ICG': {'hash_period': (1 << 256) * 102, 'variable_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 256},
                             'PCG64_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'PCG64_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'LCG64_32_ext': {'hash_period': 1 << 128, 'variable_period': True, 'additional_hash': False, 'seed_size': 64, 'hash_size': 32},
@@ -111,6 +112,7 @@ class pure_prng:
         all_hash_callable_dict = {'internal_generator': {'seed_init_callable': self.__seed_initialize_internal_generator, 'set_hash_period_callable': self.__set_hash_period_of_general, 'hash_callable': self.__internal_generator},
                                   'QCG': {'seed_init_callable': self.__seed_initialize_quadratic_congruential_generator, 'set_hash_period_callable': self.__set_hash_period_of_general, 'hash_callable': self.__quadratic_congruential_generator},
                                   'CCG': {'seed_init_callable': self.__seed_initialize_cubic_congruential_generator, 'set_hash_period_callable': self.__set_hash_period_of_general, 'hash_callable': self.__cubic_congruential_generator},
+                                  'ICG': {'seed_init_callable': self.__seed_initialize_icg, 'hash_callable': self.__icg},
                                   'PCG64_XSL_RR': {'seed_init_callable': self.__seed_initialize_pcg64_xsl_rr, 'hash_callable': self.__pcg64_xsl_rr},
                                   'PCG64_DXSM': {'seed_init_callable': self.__seed_initialize_pcg64_dxsm, 'hash_callable': self.__pcg64_dxsm},
                                   'LCG64_32_ext': {'seed_init_callable': self.__seed_initialize_lcg64_32_ext, 'set_hash_period_callable': self.__set_hash_period_of_lcg64_32_ext, 'hash_callable': self.__lcg64_32_ext},
@@ -271,6 +273,16 @@ class pure_prng:
             x = (((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
             yield x
         raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
+    
+    
+    def __seed_initialize_icg(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The ICG method is initialized with seeds.
+        self.icg_instance = ICG(seed)
+    
+    
+    def __icg(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.icg_instance".
+        while True:
+            yield self.icg_instance.random_raw()
     
     
     def __seed_initialize_pcg64_xsl_rr(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The PCG64_XSL_RR method is initialized with seeds.
