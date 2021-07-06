@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+from prng_algorithms_package.ICG_module import *
 from prng_algorithms_package.LCG64_32_ext_module import *
 from prng_algorithms_package.XSM64_module import *
 from prng_algorithms_package.SquaresCounter_module import *
