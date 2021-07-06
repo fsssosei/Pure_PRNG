@@ -27,7 +27,7 @@ Integer = TypeVar('Integer', int, mpz)
 
 class SquaresCounter:
     '''
-        A new counter-based RNG based on Johnvon  Neumann’s  middle  square. 
+        A new counter-based RNG based on Johnvon Neumann’s middle square. 
         The period of this random generator is 2^64
         
         References
