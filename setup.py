@@ -23,7 +23,7 @@ with open("README.md", encoding='utf-8') as fh:
 
 setup(
     name='pure_prng',
-    version='2.1.0',
+    version='2.2.0',
     description='Generate professional pseudo-random number package in python.',
     long_description=long_description,
     long_description_content_type='text/markdown',
