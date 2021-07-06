@@ -18,8 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import TypeVar
 from ctypes import c_uint64
-from gmpy2 import mpz, bit_mask as gmpy2_bit_mask
-from rng_util_package import rotl
+from gmpy2 import mpz
+from rng_util_package import bit_length_mask, rotl
 
 __all__ = ['XSM64']
 
@@ -36,30 +36,29 @@ class XSM64:
         http://pracrand.sourceforge.net/RNG_engines.txt
     '''
     
-    version = '1.0.0'
+    version = '1.0.2'
     
     def __step_forwards(self):
-        tmp = (self.lcg_low + self.lcg_adder_high) & self.mask64
-        self.lcg_low = (self.lcg_low + self.lcg_adder_low) & self.mask64
-        self.lcg_high = (self.lcg_high + tmp + (1 if self.lcg_low < self.lcg_adder_low else 0)) & self.mask64
+        tmp = bit_length_mask(self.lcg_low + self.lcg_adder_high, 64)
+        self.lcg_low = bit_length_mask(self.lcg_low + self.lcg_adder_low, 64)
+        self.lcg_high = bit_length_mask(self.lcg_high + tmp + (1 if self.lcg_low < self.lcg_adder_low else 0), 64)
     
     
-    def __init__(self, seed: int):
+    def __init__(self, seed: Integer):
         '''
             Create an instance of a pseudo-random number generator.  创建一个伪随机数生成器的实例。
             
             Parameters
             ----------
-            seed: Integer, default None
+            seed: Integer
                 Sets the seed for the current instance.
+                Any input seed that is longer than 64 bits will be truncated to the lower 64 bits.
         '''
-        self.mask64 = gmpy2_bit_mask(64)
-        
         self.lcg_adder_low = c_uint64(1).value
         self.lcg_adder_high = c_uint64(seed << 1).value
         
         self.lcg_low = self.lcg_adder_low
-        self.lcg_high = self.lcg_adder_high ^ (((seed & self.mask64) >> 63) << 63)
+        self.lcg_high = self.lcg_adder_high ^ ((bit_length_mask(seed, 64) >> 63) << 63)
 
         self.__step_forwards()
     
@@ -67,14 +66,14 @@ class XSM64:
     def random_raw(self) -> Integer:
         K = c_uint64(0xA3EC647659359ACD).value
         
-        tmp = self.lcg_high ^ rotl((self.lcg_high + self.lcg_low) & self.mask64, 64, 16)
-        tmp ^= rotl((tmp + self.lcg_adder_high) & self.mask64, 64, 40)
-        tmp = (tmp * K) & self.mask64
+        tmp = self.lcg_high ^ rotl(bit_length_mask(self.lcg_high + self.lcg_low, 64), 64, 16)
+        tmp ^= rotl(bit_length_mask(tmp + self.lcg_adder_high, 64), 64, 40)
+        tmp = bit_length_mask(tmp * K, 64)
         
         self.__step_forwards()
         
-        tmp ^= rotl((tmp + self.lcg_high) & self.mask64, 64, 32)
-        tmp = (tmp * K) & self.mask64
+        tmp ^= rotl(bit_length_mask(tmp + self.lcg_high, 64), 64, 32)
+        tmp = bit_length_mask(tmp * K, 64)
         tmp ^= tmp >> 32
         
         return tmp
