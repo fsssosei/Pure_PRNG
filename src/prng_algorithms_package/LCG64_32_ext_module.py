@@ -19,8 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import TypeVar
 from ctypes import c_uint32, c_uint64
 from array import array
-from gmpy2 import mpz, bit_mask as gmpy2_bit_mask
-from rng_util_package import rotl, rotr
+from gmpy2 import mpz
+from rng_util_package import bit_length_mask, rotl, rotr
 
 __all__ = ['LCG64_32_ext']
 
@@ -36,25 +36,25 @@ class LCG64_32_ext:
         https://baobaobear.github.io/post/20200104-xoshiro/
     '''
     
-    version = '1.1.0'
+    version = '1.1.2'
     
-    def __init__(self, seed: int, n: int = 1):
+    def __init__(self, seed: Integer, n: Integer = 1):
         '''
             Create an instance of a pseudo-random number generator.  创建一个伪随机数生成器的实例。
             
             Parameters
             ----------
-            seed: Integer, default None
+            seed: Integer
                 Sets the seed for the current instance.
+                Any input seed that is longer than 64 bits will be truncated to the lower 64 bits.
             
-            n: int, default integer 1
+            n: Integer, default integer 1
                 Set the parameters for the period.
                 The period of this random generator is 2^(32*(2^n+2))
         '''
         self.n = n
         self.ext_size = 1 << n
         
-        self.mask32 = gmpy2_bit_mask(32)
         ext_seed_multiplier = c_uint64(6364136223846793005).value
         ext_seed_addend = c_uint64(1).value
         
@@ -67,11 +67,11 @@ class LCG64_32_ext:
         self.a_array = array('L')
         self.a_array.append(seed >> 32)
         if self.ext_size >= 2:
-            self.a_array.append(ext_seed & self.mask32)
+            self.a_array.append(bit_length_mask(ext_seed, 32))
             if self.ext_size >= 3:
                 self.a_array.append(ext_seed >> 32)
                 for _ in range(3, self.ext_size):
-                    self.a_array.append(rotl((self.a_array[-1] * ext_seed_multiplier + ext_seed_addend) & self.mask32, 32, self.a_array[-2] & 0xF) ^ self.a_array[-2])
+                    self.a_array.append(rotl(bit_length_mask(self.a_array[-1] * ext_seed_multiplier + ext_seed_addend, 32), 32, self.a_array[-2] & 0xF) ^ self.a_array[-2])
         
         for i in range(init_num_of_iter):
             self.random_raw()
@@ -86,10 +86,10 @@ class LCG64_32_ext:
             carry = False
             for i in range(self.ext_size):
                 if carry:
-                    self.a_array[i] = (self.a_array[i] * a_array_multiplier + a_array_addend) & self.mask32
+                    self.a_array[i] = bit_length_mask(self.a_array[i] * a_array_multiplier + a_array_addend, 32)
                     carry = (self.a_array[i] == 0)
-                self.a_array[i] = (self.a_array[i] * a_array_multiplier + a_array_addend) & self.mask32
+                self.a_array[i] = bit_length_mask(self.a_array[i] * a_array_multiplier + a_array_addend, 32)
                 carry |= (self.a_array[i] == 0)
         prev_s = self.s
-        self.s = (self.s * s_multiplier + s_addend) & gmpy2_bit_mask(64)
-        return rotr(self.s >> 32, 32, prev_s >> 59) ^ self.a_array[prev_s & gmpy2_bit_mask(self.n)]
+        self.s = bit_length_mask(self.s * s_multiplier + s_addend, 64)
+        return rotr(self.s >> 32, 32, prev_s >> 59) ^ self.a_array[bit_length_mask(prev_s, self.n)]
