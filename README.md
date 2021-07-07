@@ -113,6 +113,4 @@ MIXMAX
 
 NLFSR
 
-Salmon
-
 GPU Philox
