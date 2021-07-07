@@ -33,6 +33,8 @@ XSM64
 
 EFIIX64
 
+SplitMix64
+
 PhiloxCounter
 
 ThreeFryCounter
