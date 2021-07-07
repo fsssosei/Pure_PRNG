@@ -109,8 +109,6 @@ Example:
 
 The following algorithm is intended to be implemented:
 
-MIXMAX
-
 NLFSR
 
 GPU Philox
