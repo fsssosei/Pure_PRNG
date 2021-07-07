@@ -111,4 +111,6 @@ The following algorithm is intended to be implemented:
 
 NLFSR
 
+Cellular automate period pseudo random
+
 GPU Philox
