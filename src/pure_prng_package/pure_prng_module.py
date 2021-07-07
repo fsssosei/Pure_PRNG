@@ -43,7 +43,7 @@ class pure_prng:
         
     '''
     
-    version = '2.4.0'
+    version = '2.4.1'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
