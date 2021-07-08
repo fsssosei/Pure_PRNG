@@ -109,7 +109,7 @@ Example:
 	>>> next(rand_with_period)
 	mpz(53067260390396280968027884646874354062063398901623645439544105836818444733296)
 
-##Future work
+## Future work
 
 The following algorithm is intended to be implemented:
 
