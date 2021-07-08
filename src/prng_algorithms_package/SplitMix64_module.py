@@ -17,7 +17,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 from typing import TypeVar
-from ctypes import c_uint64
 from gmpy2 import mpz
 from rng_util_package import bit_length_mask
 
@@ -36,7 +35,7 @@ class SplitMix64:
         http://docs.random.dlang.io/latest/mir_random_engine_splitmix.html
     '''
     
-    version = '1.0.0'
+    version = '1.0.1'
     
     def __init__(self, seed: Integer):
         '''
