@@ -35,6 +35,8 @@ EFIIX64
 
 SplitMix64
 
+Ran64
+
 PhiloxCounter
 
 ThreeFryCounter
