@@ -43,7 +43,7 @@ class pure_prng:
         
     '''
     
-    version = '2.4.1'
+    version = '2.5.0'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
@@ -57,6 +57,7 @@ class pure_prng:
                             'XSM64': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
                             'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
                             'SplitMix64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
+                            'Ran64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
                             'PhiloxCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
                             'AESCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
@@ -123,6 +124,7 @@ class pure_prng:
                                   'XSM64': {'seed_init_callable': self.__seed_initialize_xsm64, 'hash_callable': self.__xsm64},
                                   'EFIIX64': {'seed_init_callable': self.__seed_initialize_efiix64, 'hash_callable': self.__efiix64},
                                   'SplitMix64': {'seed_init_callable': self.__seed_initialize_splitmix64, 'hash_callable': self.__splitmix64},
+                                  'Ran64': {'seed_init_callable': self.__seed_initialize_ran64, 'hash_callable': self.__ran64},
                                   'PhiloxCounter': {'seed_init_callable': self.__seed_initialize_philox_counter, 'hash_callable': self.__philox_counter},
                                   'ThreeFryCounter': {'seed_init_callable': self.__seed_initialize_threefry_counter, 'hash_callable': self.__threefry_counter},
                                   'AESCounter': {'seed_init_callable': self.__seed_initialize_aes_counter, 'hash_callable': self.__aes_counter},
@@ -378,6 +380,16 @@ class pure_prng:
         #The external variable used is "self.splitmix64_instance".
         while True:
             yield self.splitmix64_instance.random_raw()
+    
+    
+    def __seed_initialize_ran64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The Ran64 method is initialized with seeds.
+        self.ran64_instance = Ran64(seed)
+    
+    
+    def __ran64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.ran64_instance".
+        while True:
+            yield self.ran64_instance.random_raw()
     
     
     def __seed_initialize_philox_counter(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The PhiloxCounter method is initialized with seeds.
