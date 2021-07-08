@@ -36,7 +36,7 @@ class XSM64:
         http://pracrand.sourceforge.net/RNG_engines.txt
     '''
     
-    version = '1.0.2'
+    version = '1.0.3'
     
     def __step_forwards(self):
         tmp = bit_length_mask(self.lcg_low + self.lcg_adder_high, 64)
@@ -66,13 +66,15 @@ class XSM64:
     def random_raw(self) -> Integer:
         K = c_uint64(0xA3EC647659359ACD).value
         
-        tmp = self.lcg_high ^ rotl(bit_length_mask(self.lcg_high + self.lcg_low, 64), 64, 16)
+        lcg_high = self.lcg_high
+        
+        tmp = lcg_high ^ rotl(bit_length_mask(lcg_high + self.lcg_low, 64), 64, 16)
         tmp ^= rotl(bit_length_mask(tmp + self.lcg_adder_high, 64), 64, 40)
         tmp = bit_length_mask(tmp * K, 64)
         
         self.__step_forwards()
         
-        tmp ^= rotl(bit_length_mask(tmp + self.lcg_high, 64), 64, 32)
+        tmp ^= rotl(bit_length_mask(tmp + lcg_high, 64), 64, 32)
         tmp = bit_length_mask(tmp * K, 64)
         tmp ^= tmp >> 32
         
