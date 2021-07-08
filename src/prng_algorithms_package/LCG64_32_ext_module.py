@@ -36,7 +36,7 @@ class LCG64_32_ext:
         https://baobaobear.github.io/post/20200104-xoshiro/
     '''
     
-    version = '1.1.2'
+    version = '1.1.3'
     
     def __init__(self, seed: Integer, n: Integer = 1):
         '''
@@ -82,14 +82,17 @@ class LCG64_32_ext:
         a_array_addend = c_uint32(887987685).value
         s_multiplier = c_uint64(3935559000370003845).value
         s_addend = c_uint64(1442695040888963407).value
-        if self.s == 0:
+        s = self.s
+        a_array = self.a_array
+        if s == 0:
             carry = False
             for i in range(self.ext_size):
                 if carry:
-                    self.a_array[i] = bit_length_mask(self.a_array[i] * a_array_multiplier + a_array_addend, 32)
-                    carry = (self.a_array[i] == 0)
-                self.a_array[i] = bit_length_mask(self.a_array[i] * a_array_multiplier + a_array_addend, 32)
-                carry |= (self.a_array[i] == 0)
-        prev_s = self.s
-        self.s = bit_length_mask(self.s * s_multiplier + s_addend, 64)
-        return rotr(self.s >> 32, 32, prev_s >> 59) ^ self.a_array[bit_length_mask(prev_s, self.n)]
+                    a_array[i] = bit_length_mask(a_array[i] * a_array_multiplier + a_array_addend, 32)
+                    carry = (a_array[i] == 0)
+                a_array[i] = bit_length_mask(a_array[i] * a_array_multiplier + a_array_addend, 32)
+                carry |= (a_array[i] == 0)
+        prev_s = s
+        s = bit_length_mask(s * s_multiplier + s_addend, 64)
+        self.s = s
+        return rotr(s >> 32, 32, prev_s >> 59) ^ a_array[bit_length_mask(prev_s, self.n)]
