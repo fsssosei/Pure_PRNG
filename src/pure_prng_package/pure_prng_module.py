@@ -43,27 +43,27 @@ class pure_prng:
         
     '''
     
-    version = '2.5.0'
+    version = '2.6.0'
     
-    prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
-                            'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_size': 256, 'hash_size': 256},
-                            'ICG': {'hash_period': (1 << 256) * 102, 'variable_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 256},
-                            'PCG64_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'PCG64_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'LCG64_32_ext': {'hash_period': 1 << 128, 'variable_period': True, 'additional_hash': False, 'seed_size': 64, 'hash_size': 32},
-                            'LCG128Mix_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'LCG128Mix_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'LCG128Mix_MURMUR3': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'XSM64': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
-                            'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
-                            'SplitMix64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
-                            'Ran64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 64},
-                            'PhiloxCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'AESCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 128, 'hash_size': 64},
-                            'ChaChaCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 64},
-                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_size': 256, 'hash_size': 64},
-                            'SquaresCounter': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_size': 64, 'hash_size': 32}}
+    prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
+                            'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
+                            'ICG': {'hash_period': (1 << 256) * 102, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 ** 256 * 102 + 1, 'hash_size': 256},
+                            'PCG64_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'PCG64_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'LCG64_32_ext': {'hash_period': 1 << 128, 'variable_period': True, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 32},
+                            'LCG128Mix_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'LCG128Mix_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'LCG128Mix_MURMUR3': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'XSM64': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'SplitMix64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'Ran64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'PhiloxCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'AESCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'ChaChaCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64},
+                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64},
+                            'SquaresCounter': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 32}}
     
     for _, algorithm_characteristics_parameter in prng_algorithms_dict.items():
         hash_period = algorithm_characteristics_parameter['hash_period']
@@ -151,7 +151,7 @@ class pure_prng:
             internal_algorithm_characteristics_parameter['hash_period'] = 1 << internal_output_size
             internal_algorithm_characteristics_parameter['variable_period'] = True
             internal_algorithm_characteristics_parameter['additional_hash'] = False
-            internal_algorithm_characteristics_parameter['seed_size'] = internal_output_size
+            internal_algorithm_characteristics_parameter['seed_range'] = 1 << internal_output_size
             internal_algorithm_characteristics_parameter['hash_size'] = internal_output_size
             internal_algorithm_characteristics_parameter['prng_period'] = 1 << internal_output_size
             internal_algorithm_characteristics_parameter['output_width'] = 1
@@ -194,7 +194,7 @@ class pure_prng:
         new_prng_period_bit_length = new_prng_period.bit_length()
         new_prng_period_bit_length -= 1 if (new_prng_period & gmpy2_bit_mask(new_prng_period_bit_length - 1)) == 0  else 0
         algorithm_characteristics_parameter['hash_period'] = new_prng_period
-        algorithm_characteristics_parameter['seed_size'] = new_prng_period_bit_length
+        algorithm_characteristics_parameter['seed_range'] = 1 << new_prng_period_bit_length
         algorithm_characteristics_parameter['hash_size'] = new_prng_period_bit_length
         algorithm_characteristics_parameter['prng_period'] = new_prng_period
         algorithm_characteristics_parameter['output_width'] = 1
@@ -223,14 +223,14 @@ class pure_prng:
     
     
     def __seed_initialization(self, seed: Union[Integer, None], algorithm_characteristics_parameter: dict, hash_callable: Callable[[dict, Integer, dict], None]) -> None:  #The original seed is hash obfuscated for pseudo-random generation.
-        seed_size = algorithm_characteristics_parameter['seed_size']
+        seed_range = algorithm_characteristics_parameter['seed_range']
         
         if seed is None:
             nrng_instance = pure_nrng()
-            nrng_instance_true_rand_bits = nrng_instance.true_rand_bits(seed_size)
+            nrng_instance_true_rand_bits = nrng_instance.true_rand_bits((seed_range - 1).bit_length())
             seed = next(nrng_instance_true_rand_bits)  #Read unreproducible seeds provided by the operating system.
         else:
-            seed = seed & gmpy2_bit_mask(seed_size)
+            seed = seed % seed_range
         seed = int(seed)
         hash_callable(locals(), seed, algorithm_characteristics_parameter)  #The specific initialization seed method is called according to prng_type.
     
