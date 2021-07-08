@@ -49,6 +49,8 @@ SPECKCounter
 
 SquaresCounter
 
+***Please inform me if any PRNG fails to pass the new statistical test.***
+
 ## Installation
 
 Installation can be done through pip. You must have python version >= 3.8
