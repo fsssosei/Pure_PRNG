@@ -43,11 +43,11 @@ class pure_prng:
         
     '''
     
-    version = '2.6.0'
+    version = '2.6.1'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
-                            'ICG': {'hash_period': (1 << 256) * 102, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 ** 256 * 102 + 1, 'hash_size': 256},
+                            'ICG': {'hash_period': (1 << 256) * 102, 'variable_period': False, 'additional_hash': False, 'seed_range': 2 ** 256 * 102 + 1, 'hash_size': 256},
                             'PCG64_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'PCG64_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'LCG64_32_ext': {'hash_period': 1 << 128, 'variable_period': True, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 32},
