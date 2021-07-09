@@ -20,4 +20,3 @@ from prng_algorithms_package.ICG_module import *
 from prng_algorithms_package.LCG64_32_ext_module import *
 from prng_algorithms_package.XSM64_module import *
 from prng_algorithms_package.Ran64_module import *
-from prng_algorithms_package.SquaresCounter_module import *
