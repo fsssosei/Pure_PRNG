@@ -45,8 +45,6 @@ ChaChaCounter
 
 SPECKCounter
 
-SquaresCounter
-
 ***Please inform me if any PRNG fails to pass the new statistical test.***
 
 ## Installation
