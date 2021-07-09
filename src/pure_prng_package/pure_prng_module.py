@@ -43,7 +43,7 @@ class pure_prng:
         
     '''
     
-    version = '2.7.0'
+    version = '2.8.0'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
@@ -61,8 +61,7 @@ class pure_prng:
                             'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'AESCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'ChaChaCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64},
-                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64},
-                            'SquaresCounter': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 32}}
+                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64}}
     
     for _, algorithm_characteristics_parameter in prng_algorithms_dict.items():
         hash_period = algorithm_characteristics_parameter['hash_period']
@@ -127,8 +126,7 @@ class pure_prng:
                                   'ThreeFryCounter': {'seed_init_callable': self.__seed_initialize_threefry_counter, 'hash_callable': self.__threefry_counter},
                                   'AESCounter': {'seed_init_callable': self.__seed_initialize_aes_counter, 'hash_callable': self.__aes_counter},
                                   'ChaChaCounter': {'seed_init_callable': self.__seed_initialize_chacha_counter, 'hash_callable': self.__chacha_counter},
-                                  'SPECKCounter': {'seed_init_callable': self.__seed_initialize_speck_counter, 'hash_callable': self.__speck_counter},
-                                  'SquaresCounter': {'seed_init_callable': self.__seed_initialize_squares_counter, 'hash_callable': self.__squares_counter}}
+                                  'SPECKCounter': {'seed_init_callable': self.__seed_initialize_speck_counter, 'hash_callable': self.__speck_counter}}
         
         if (seed is not None) and (seed < 0): raise ValueError('seed must be >= 0')
         prng_algorithms_dict = self.__class__.prng_algorithms_dict
@@ -428,16 +426,6 @@ class pure_prng:
         #The external variable used is "self.speck_counter_instance".
         while True:
             yield self.speck_counter_instance.random_raw()
-    
-    
-    def __seed_initialize_squares_counter(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The SquaresCounter method is initialized with seeds.
-        self.squares_counter_instance = SquaresCounter(seed)
-    
-    
-    def __squares_counter(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
-        #The external variable used is "self.squares_counter_instance".
-        while True:
-            yield self.squares_counter_instance.random_raw()
     
     
     def source_random_number(self) -> Iterator[Integer]:
