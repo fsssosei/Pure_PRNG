@@ -43,7 +43,7 @@ class pure_prng:
         
     '''
     
-    version = '2.8.0'
+    version = '2.8.2'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
@@ -70,7 +70,7 @@ class pure_prng:
             algorithm_characteristics_parameter['output_width'] = 1
             algorithm_characteristics_parameter['output_size'] = hash_size
         else:
-            period_bit_length = hash_period.bit_length() - 1
+            period_bit_length = mpz(hash_period - 1).num_digits(2)
             hash_size = algorithm_characteristics_parameter['hash_size']
             output_width = gmpy2_c_div(period_bit_length, hash_size)
             algorithm_characteristics_parameter['prng_period'] = gmpy2_t_div(hash_period, output_width)
@@ -136,7 +136,7 @@ class pure_prng:
         if algorithm_characteristics_parameter['variable_period']:
             if new_prng_period is not None:
                 if new_prng_period < 1: raise ValueError('new_prng_period must be >= 1')
-                if new_prng_period & gmpy2_bit_mask(new_prng_period.bit_length() - 1) != 0: raise ValueError('new_prng_period must be a power of 2')
+                if new_prng_period & gmpy2_bit_mask(mpz(new_prng_period).num_digits(2) - 1) != 0: raise ValueError('new_prng_period must be a power of 2')
                 self.__set_hash_period(algorithm_characteristics_parameter, new_prng_period, all_hash_callable_dict[prng_type]['set_hash_period_callable'])
         else:
             if new_prng_period is not None: raise TypeError(f'The {prng_type} algorithm cannot modify the period.')
@@ -187,8 +187,7 @@ class pure_prng:
     
     
     def __set_hash_period_of_general(self, algorithm_characteristics_parameter: dict, new_prng_period: Integer) -> None:
-        new_prng_period_bit_length = new_prng_period.bit_length()
-        new_prng_period_bit_length -= 1 if (new_prng_period & gmpy2_bit_mask(new_prng_period_bit_length - 1)) == 0  else 0
+        new_prng_period_bit_length = mpz(new_prng_period - 1).num_digits(2)
         algorithm_characteristics_parameter['hash_period'] = new_prng_period
         algorithm_characteristics_parameter['seed_range'] = 1 << new_prng_period_bit_length
         algorithm_characteristics_parameter['hash_size'] = new_prng_period_bit_length
@@ -198,15 +197,14 @@ class pure_prng:
     
     
     def __set_hash_period_of_lcg64_32_ext(self, algorithm_characteristics_parameter: dict, new_prng_period: Integer) -> None:
-        new_prng_period_bit_length = new_prng_period.bit_length()
-        new_prng_period_bit_length -= 1 if (new_prng_period & gmpy2_bit_mask(new_prng_period_bit_length - 1)) == 0 else 0
+        new_prng_period_bit_length = mpz(new_prng_period - 1).num_digits(2)
         
         q, r = divmod(new_prng_period_bit_length, 32)
         output_width = q + (1 if r != 0 else 0)
         new_hash_period_bit_length =  new_prng_period_bit_length * output_width
         
         q, r = divmod(new_hash_period_bit_length, 32)
-        n = (q - 2).bit_length() - (1 if r == 0 else 0)
+        n = mpz(q - 2).num_digits(2) - (1 if r == 0 else 0)
         set_hash_period_bit_length = 32 * (2 ** n + 2)
         
         hash_period = 2 ** set_hash_period_bit_length
@@ -223,7 +221,7 @@ class pure_prng:
         
         if seed is None:
             nrng_instance = pure_nrng()
-            nrng_instance_true_rand_bits = nrng_instance.true_rand_bits((seed_range - 1).bit_length())
+            nrng_instance_true_rand_bits = nrng_instance.true_rand_bits(mpz(seed_range - 1).num_digits(2))
             seed = next(nrng_instance_true_rand_bits)  #Read unreproducible seeds provided by the operating system.
         else:
             seed = seed % seed_range
@@ -241,7 +239,7 @@ class pure_prng:
         
         m = algorithm_characteristics_parameter['hash_size']
         while True:
-            x = (((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
+            x = rng_util.bit_length_mask(((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1, m)
             yield x
     
     
@@ -255,7 +253,7 @@ class pure_prng:
         
         m = algorithm_characteristics_parameter['hash_size']
         for _ in range(algorithm_characteristics_parameter['hash_period']):
-            x = (((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
+            x = rng_util.bit_length_mask(((x**2)<<1) + ((x<<2)-x) + 1, m)
             yield x
         raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
     
@@ -270,7 +268,7 @@ class pure_prng:
         
         m = algorithm_characteristics_parameter['hash_size']
         for _ in range(algorithm_characteristics_parameter['hash_period']):
-            x = (((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1) & gmpy2_bit_mask(m)
+            x = rng_util.bit_length_mask(((x**3)<<2) + ((x**2)<<1) + ((x<<2)-x) + 1, m)
             yield x
         raise StopIteration('The number of times it is generated exceeds the number of hash period.')  #生成次数超出散列周期数。
     
@@ -306,9 +304,9 @@ class pure_prng:
     
     
     def __seed_initialize_lcg64_32_ext(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The LCG64_32_ext method is initialized with seeds.
-        period_bit_length = algorithm_characteristics_parameter['hash_period'].bit_length() - 1
+        period_bit_length = mpz(algorithm_characteristics_parameter['hash_period'] - 1).num_digits(2)
         q = period_bit_length // 32
-        n = (q - 2).bit_length() - 1
+        n = mpz(q - 2).num_digits(2) - 1
         self.lcg64_32_ext_instance = LCG64_32_ext(seed, n)
     
     
