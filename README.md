@@ -17,33 +17,25 @@ There are "methods" that specify the period of a multi-precision pseudo-random s
 
 ## Realized pseudo-random number generation algorithm
 
-Quadratic Congruential Generator
-
-Cubic Congruential Generator
-
-Inversive Congruential Generator
-
-PCG64_XSL_RR; PCG64_DXSM
-
-LCG64_32_ext
-
-LCG128Mix_XSL_RR; LCG128Mix_DXSM; LCG128Mix_MURMUR3
-
-XSM64
-
-EFIIX64
-
-Ran64
-
-PhiloxCounter
-
-ThreeFryCounter
-
-AESCounter
-
-ChaChaCounter
-
-SPECKCounter
+|PRNG algorithms                      |Period|
+|-------------------------------------|------|
+|Quadratic Congruential Generator(QCG)|2^256|
+|Cubic Congruential Generator(CCG)|2^256|
+|Inversive Congruential Generator(ICG)|102\*2^256|
+|PCG64_XSL_RR|2^128|
+|PCG64_DXSM|2^128|
+|LCG64_32_ext|2^128|
+|LCG128Mix_XSL_RR|2^128|
+|LCG128Mix_DXSM|2^128|
+|LCG128Mix_MURMUR3|2^128|
+|XSM64|2^128|
+|EFIIX64|2^64|
+|Ran64|2^64|
+|PhiloxCounter|4\*2^(4\*64)|
+|ThreeFryCounter|4\*2^(4\*64)|
+|AESCounter|2^128|
+|ChaChaCounter|2^128|
+|SPECKCounter|2^129|
 
 ***Please inform me if any PRNG fails to pass the new statistical test.***
 
