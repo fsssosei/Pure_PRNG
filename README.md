@@ -33,7 +33,6 @@ There are "methods" that specify the period of a multi-precision pseudo-random s
 |Ran64|2^64|
 |PhiloxCounter|4\*2^(4\*64)|
 |ThreeFryCounter|4\*2^(4\*64)|
-|AESCounter|2^128|
 |ChaChaCounter|2^128|
 |SPECKCounter|2^129|
 
