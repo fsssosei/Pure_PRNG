@@ -41,9 +41,29 @@ class pure_prng:
         It must be a pseudo-random number generation algorithm with hash block values in [0, 2^n-1], and k-dimensional uniform distribution.  必须是hash块值域在[0, 2^n-1]，和k维均匀分布的伪随机数生成算法。
         The period of the available algorithm must be an integer multiple of 2^hash_size.  可用算法的周期必须是2^hash_size的整数倍。
         
+        List of PRNG algorithms                  Period
+        -----------------------                  ------
+        Quadratic Congruential Generator(QCG)    2^256
+        Cubic Congruential Generator(CCG)        2^256
+        Inversive Congruential Generator(ICG)    102*2^256
+        PCG64_XSL_RR                             2^128
+        PCG64_DXSM                               2^128
+        LCG64_32_ext                             2^128
+        LCG128Mix_XSL_RR                         2^128
+        LCG128Mix_DXSM                           2^128
+        LCG128Mix_MURMUR3                        2^128
+        PhiloxCounter                            4*2^(4*64)
+        ThreeFryCounter                          4*2^(4*64)
+        AESCounter                               2^128
+        ChaChaCounter                            2^128
+        SPECKCounter                             2^129
+        XSM64                                    2^128
+        EFIIX64                                  2^64
+        SplitMix64                               2^64
+        Ran64                                    2^64
     '''
     
-    version = '2.8.2'
+    version = '2.9.0'
     
     prng_algorithms_dict = {'QCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
                             'CCG': {'hash_period': 1 << 256, 'variable_period': True, 'additional_hash': True, 'seed_range': 1 << 256, 'hash_size': 256},
@@ -54,14 +74,15 @@ class pure_prng:
                             'LCG128Mix_XSL_RR': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'LCG128Mix_DXSM': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'LCG128Mix_MURMUR3': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
-                            'XSM64': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
-                            'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
-                            'Ran64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
-                            'PhiloxCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
-                            'ThreeFryCounter': {'hash_period': 1 << 256, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'PhiloxCounter': {'hash_period': 4 * 2 ** (4 * 64), 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
+                            'ThreeFryCounter': {'hash_period': 4 * 2 ** (4 * 64), 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'AESCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 128, 'hash_size': 64},
                             'ChaChaCounter': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64},
-                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64}}
+                            'SPECKCounter': {'hash_period': 1 << 129, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 256, 'hash_size': 64},
+                            'XSM64': {'hash_period': 1 << 128, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'EFIIX64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'SplitMix64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64},
+                            'Ran64': {'hash_period': 1 << 64, 'variable_period': False, 'additional_hash': False, 'seed_range': 1 << 64, 'hash_size': 64}}
     
     for _, algorithm_characteristics_parameter in prng_algorithms_dict.items():
         hash_period = algorithm_characteristics_parameter['hash_period']
@@ -119,14 +140,15 @@ class pure_prng:
                                   'LCG128Mix_XSL_RR': {'seed_init_callable': self.__seed_initialize_lcg128mix_xsl_rr, 'hash_callable': self.__lcg128mix_xsl_rr},
                                   'LCG128Mix_DXSM': {'seed_init_callable': self.__seed_initialize_lcg128mix_dxsm, 'hash_callable': self.__lcg128mix_dxsm},
                                   'LCG128Mix_MURMUR3': {'seed_init_callable': self.__seed_initialize_lcg128mix_murmur3, 'hash_callable': self.__lcg128mix_murmur3},
-                                  'XSM64': {'seed_init_callable': self.__seed_initialize_xsm64, 'hash_callable': self.__xsm64},
-                                  'EFIIX64': {'seed_init_callable': self.__seed_initialize_efiix64, 'hash_callable': self.__efiix64},
-                                  'Ran64': {'seed_init_callable': self.__seed_initialize_ran64, 'hash_callable': self.__ran64},
                                   'PhiloxCounter': {'seed_init_callable': self.__seed_initialize_philox_counter, 'hash_callable': self.__philox_counter},
                                   'ThreeFryCounter': {'seed_init_callable': self.__seed_initialize_threefry_counter, 'hash_callable': self.__threefry_counter},
                                   'AESCounter': {'seed_init_callable': self.__seed_initialize_aes_counter, 'hash_callable': self.__aes_counter},
                                   'ChaChaCounter': {'seed_init_callable': self.__seed_initialize_chacha_counter, 'hash_callable': self.__chacha_counter},
-                                  'SPECKCounter': {'seed_init_callable': self.__seed_initialize_speck_counter, 'hash_callable': self.__speck_counter}}
+                                  'SPECKCounter': {'seed_init_callable': self.__seed_initialize_speck_counter, 'hash_callable': self.__speck_counter},
+                                  'XSM64': {'seed_init_callable': self.__seed_initialize_xsm64, 'hash_callable': self.__xsm64},
+                                  'EFIIX64': {'seed_init_callable': self.__seed_initialize_efiix64, 'hash_callable': self.__efiix64},
+                                  'SplitMix64': {'seed_init_callable': self.__seed_initialize_splitmix64, 'hash_callable': self.__splitmix64},
+                                  'Ran64': {'seed_init_callable': self.__seed_initialize_ran64, 'hash_callable': self.__ran64}}
         
         if (seed is not None) and (seed < 0): raise ValueError('seed must be >= 0')
         prng_algorithms_dict = self.__class__.prng_algorithms_dict
@@ -346,36 +368,6 @@ class pure_prng:
             yield self.lcg128mix_murmur3_instance.random_raw()
     
     
-    def __seed_initialize_xsm64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The XSM64 method is initialized with seeds.
-        self.xsm64_instance = XSM64(seed)
-    
-    
-    def __xsm64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
-        #The external variable used is "self.xsm64_instance".
-        while True:
-            yield self.xsm64_instance.random_raw()
-    
-    
-    def __seed_initialize_efiix64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The EFIIX64 method is initialized with seeds.
-        self.efiix64_instance = EFIIX64(seed)
-    
-    
-    def __efiix64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
-        #The external variable used is "self.efiix64_instance".
-        while True:
-            yield self.efiix64_instance.random_raw()
-    
-    
-    def __seed_initialize_ran64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The Ran64 method is initialized with seeds.
-        self.ran64_instance = Ran64(seed)
-    
-    
-    def __ran64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
-        #The external variable used is "self.ran64_instance".
-        while True:
-            yield self.ran64_instance.random_raw()
-    
-    
     def __seed_initialize_philox_counter(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The PhiloxCounter method is initialized with seeds.
         self.philox_counter_instance = PhiloxCounter(key = seed)
     
@@ -424,6 +416,46 @@ class pure_prng:
         #The external variable used is "self.speck_counter_instance".
         while True:
             yield self.speck_counter_instance.random_raw()
+    
+    
+    def __seed_initialize_xsm64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The XSM64 method is initialized with seeds.
+        self.xsm64_instance = XSM64(seed)
+    
+    
+    def __xsm64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.xsm64_instance".
+        while True:
+            yield self.xsm64_instance.random_raw()
+    
+    
+    def __seed_initialize_efiix64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The EFIIX64 method is initialized with seeds.
+        self.efiix64_instance = EFIIX64(seed)
+    
+    
+    def __efiix64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.efiix64_instance".
+        while True:
+            yield self.efiix64_instance.random_raw()
+    
+    
+    def __seed_initialize_splitmix64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The SplitMix64 method is initialized with seeds.
+        self.splitmix64_instance = SplitMix64(seed)
+    
+    
+    def __splitmix64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.splitmix64_instance".
+        while True:
+            yield self.splitmix64_instance.random_raw()
+    
+    
+    def __seed_initialize_ran64(self, seed_init_locals: dict, seed: Integer, algorithm_characteristics_parameter: dict) -> None:  #The Ran64 method is initialized with seeds.
+        self.ran64_instance = Ran64(seed)
+    
+    
+    def __ran64(self, algorithm_characteristics_parameter: dict) -> Iterator[Integer]:
+        #The external variable used is "self.ran64_instance".
+        while True:
+            yield self.ran64_instance.random_raw()
     
     
     def source_random_number(self) -> Iterator[Integer]:
