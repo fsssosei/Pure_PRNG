@@ -28,13 +28,15 @@ There are "methods" that specify the period of a multi-precision pseudo-random s
 |LCG128Mix_XSL_RR|2^128|
 |LCG128Mix_DXSM|2^128|
 |LCG128Mix_MURMUR3|2^128|
-|XSM64|2^128|
-|EFIIX64|2^64|
-|Ran64|2^64|
 |PhiloxCounter|4\*2^(4\*64)|
 |ThreeFryCounter|4\*2^(4\*64)|
+|AESCounter|2^128|
 |ChaChaCounter|2^128|
 |SPECKCounter|2^129|
+|XSM64|2^128|
+|EFIIX64|2^64|
+|SplitMix64|2^64|
+|Ran64|2^64|
 
 ***Please inform me if any PRNG fails to pass the new statistical test.***
 
