@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import TypeVar
 from ctypes import c_uint64
 from gmpy2 import mpz
-from rng_util_package import bit_length_mask, rotl
+from rng_util_package import low_bit, rotl
 
 __all__ = ['XSM64']
 
@@ -36,12 +36,12 @@ class XSM64:
         http://pracrand.sourceforge.net/RNG_engines.txt
     '''
     
-    version = '1.0.3'
+    version = '1.0.4'
     
     def __step_forwards(self):
-        tmp = bit_length_mask(self.lcg_low + self.lcg_adder_high, 64)
-        self.lcg_low = bit_length_mask(self.lcg_low + self.lcg_adder_low, 64)
-        self.lcg_high = bit_length_mask(self.lcg_high + tmp + (1 if self.lcg_low < self.lcg_adder_low else 0), 64)
+        tmp = low_bit(self.lcg_low + self.lcg_adder_high, 64)
+        self.lcg_low = low_bit(self.lcg_low + self.lcg_adder_low, 64)
+        self.lcg_high = low_bit(self.lcg_high + tmp + (1 if self.lcg_low < self.lcg_adder_low else 0), 64)
     
     
     def __init__(self, seed: Integer):
@@ -58,24 +58,30 @@ class XSM64:
         self.lcg_adder_high = c_uint64(seed << 1).value
         
         self.lcg_low = self.lcg_adder_low
-        self.lcg_high = self.lcg_adder_high ^ ((bit_length_mask(seed, 64) >> 63) << 63)
+        self.lcg_high = self.lcg_adder_high ^ ((low_bit(seed, 64) >> 63) << 63)
 
         self.__step_forwards()
     
     
     def random_raw(self) -> Integer:
+        '''
+            Return
+            ------
+            random_raw: Integer
+                Returns a 64-bit random number.
+        '''
         K = c_uint64(0xA3EC647659359ACD).value
         
         lcg_high = self.lcg_high
         
-        tmp = lcg_high ^ rotl(bit_length_mask(lcg_high + self.lcg_low, 64), 64, 16)
-        tmp ^= rotl(bit_length_mask(tmp + self.lcg_adder_high, 64), 64, 40)
-        tmp = bit_length_mask(tmp * K, 64)
+        tmp = lcg_high ^ rotl(low_bit(lcg_high + self.lcg_low, 64), 64, 16)
+        tmp ^= rotl(low_bit(tmp + self.lcg_adder_high, 64), 64, 40)
+        tmp = low_bit(tmp * K, 64)
         
         self.__step_forwards()
         
-        tmp ^= rotl(bit_length_mask(tmp + lcg_high, 64), 64, 32)
-        tmp = bit_length_mask(tmp * K, 64)
+        tmp ^= rotl(low_bit(tmp + lcg_high, 64), 64, 32)
+        tmp = low_bit(tmp * K, 64)
         tmp ^= tmp >> 32
         
         return tmp
