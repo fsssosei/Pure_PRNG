@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import TypeVar
 from gmpy2 import mpz, invert as gmpy2_invert
-from rng_util_package import bit_length_mask
+from rng_util_package import low_bit
 
 __all__ = ['ICG']
 
@@ -35,7 +35,7 @@ class ICG:
         https://en.wikipedia.org/wiki/Inversive_congruential_generator
     '''
     
-    version = '1.0.0'
+    version = '1.0.1'
     
     def __icg(self) -> Integer:
         q = self.q
@@ -65,7 +65,13 @@ class ICG:
     
     
     def random_raw(self) -> Integer:
+        '''
+            Return
+            ------
+            random_raw: Integer
+                Returns a 256-bit random number.
+        '''
         x = self.__icg()
         if (x >> 256) == 102:
             x = self.__icg()
-        return bit_length_mask(x, 256)
+        return low_bit(x, 256)
