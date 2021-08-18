@@ -20,7 +20,7 @@ from typing import TypeVar
 from ctypes import c_uint32, c_uint64
 from array import array
 from gmpy2 import mpz
-from rng_util_package import bit_length_mask, rotl, rotr
+from rng_util_package import low_bit, rotl, rotr
 
 __all__ = ['LCG64_32_ext']
 
@@ -36,9 +36,9 @@ class LCG64_32_ext:
         https://baobaobear.github.io/post/20200104-xoshiro/
     '''
     
-    version = '1.1.3'
+    version = '1.1.4'
     
-    def __init__(self, seed: Integer, n: Integer = 1):
+    def __init__(self, seed: Integer, n: Integer = 3):
         '''
             Create an instance of a pseudo-random number generator.  创建一个伪随机数生成器的实例。
             
@@ -67,17 +67,23 @@ class LCG64_32_ext:
         self.a_array = array('L')
         self.a_array.append(seed >> 32)
         if self.ext_size >= 2:
-            self.a_array.append(bit_length_mask(ext_seed, 32))
+            self.a_array.append(low_bit(ext_seed, 32))
             if self.ext_size >= 3:
                 self.a_array.append(ext_seed >> 32)
                 for _ in range(3, self.ext_size):
-                    self.a_array.append(rotl(bit_length_mask(self.a_array[-1] * ext_seed_multiplier + ext_seed_addend, 32), 32, self.a_array[-2] & 0xF) ^ self.a_array[-2])
+                    self.a_array.append(rotl(low_bit(self.a_array[-1] * ext_seed_multiplier + ext_seed_addend, 32), 32, self.a_array[-2] & 0xF) ^ self.a_array[-2])
         
         for i in range(init_num_of_iter):
             self.random_raw()
     
     
     def random_raw(self) -> Integer:
+        '''
+            Return
+            ------
+            random_raw: Integer
+                Returns a 32-bit random number.
+        '''
         a_array_multiplier = c_uint32(2891336453).value
         a_array_addend = c_uint32(887987685).value
         s_multiplier = c_uint64(3935559000370003845).value
@@ -88,11 +94,11 @@ class LCG64_32_ext:
             carry = False
             for i in range(self.ext_size):
                 if carry:
-                    a_array[i] = bit_length_mask(a_array[i] * a_array_multiplier + a_array_addend, 32)
+                    a_array[i] = low_bit(a_array[i] * a_array_multiplier + a_array_addend, 32)
                     carry = (a_array[i] == 0)
-                a_array[i] = bit_length_mask(a_array[i] * a_array_multiplier + a_array_addend, 32)
+                a_array[i] = low_bit(a_array[i] * a_array_multiplier + a_array_addend, 32)
                 carry |= (a_array[i] == 0)
         prev_s = s
-        s = bit_length_mask(s * s_multiplier + s_addend, 64)
+        s = low_bit(s * s_multiplier + s_addend, 64)
         self.s = s
-        return rotr(s >> 32, 32, prev_s >> 59) ^ a_array[bit_length_mask(prev_s, self.n)]
+        return rotr(s >> 32, 32, prev_s >> 59) ^ a_array[low_bit(prev_s, self.n)]
