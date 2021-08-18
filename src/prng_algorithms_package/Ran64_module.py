@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import TypeVar
 from ctypes import c_uint64
 from gmpy2 import mpz
-from rng_util_package import bit_length_mask
+from rng_util_package import low_bit
 
 __all__ = ['Ran64']
 
@@ -36,7 +36,7 @@ class Ran64:
         https://people.sissa.it/~inno/pubs/rng-2018.pdf
     '''
     
-    version = '1.0.0'
+    version = '1.0.1'
     
     def __init__(self, seed: Integer):
         '''
@@ -50,7 +50,7 @@ class Ran64:
         '''
         self.v = c_uint64(0x38ecac5fb3251641).value
         self.w = c_uint64(1).value
-        self.u = bit_length_mask(seed, 64) ^ self.v
+        self.u = low_bit(seed, 64) ^ self.v
         self.random_raw()
         self.v = self.u
         self.random_raw()
@@ -59,21 +59,27 @@ class Ran64:
     
     
     def random_raw(self) -> Integer:
+        '''
+            Return
+            ------
+            random_raw: Integer
+                Returns a 64-bit random number.
+        '''
         u = self.u
-        u = bit_length_mask(u * 0x27bb2ee687b0b0fd + 0x9c740a0a6788d2c, 64)
+        u = low_bit(u * 0x27bb2ee687b0b0fd + 0x9c740a0a6788d2c, 64)
         self.u = u
         
         v = self.v
         v ^= v >> 17
-        v &= bit_length_mask(v << 31, 64)
+        v &= low_bit(v << 31, 64)
         v ^= v >> 8
         self.v = v
         
         w = self.w
-        w = bit_length_mask(w * 0xffffda61 + (w >> 32), 32)
+        w = low_bit(w * 0xffffda61 + (w >> 32), 32)
         self.w = w
         
-        x = u ^ bit_length_mask(u << 21, 64)
+        x = u ^ low_bit(u << 21, 64)
         x ^= x >> 35
-        x ^= bit_length_mask(x << 4, 64)
-        return bit_length_mask(x + v, 64) ^ w
+        x ^= low_bit(x << 4, 64)
+        return low_bit(x + v, 64) ^ w
