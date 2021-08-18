@@ -24,7 +24,7 @@ There are "methods" that specify the period of a multi-precision pseudo-random s
 |Inversive Congruential Generator(ICG)|102\*2^256|
 |PCG64_XSL_RR|2^128|
 |PCG64_DXSM|2^128|
-|LCG64_32_ext|2^128|
+|LCG64_32_ext|2^320|
 |LCG128Mix_XSL_RR|2^128|
 |LCG128Mix_DXSM|2^128|
 |LCG128Mix_MURMUR3|2^128|
